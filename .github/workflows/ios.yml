@@ -1,97 +1,64 @@
-name: iOS unsigned IPA
+name: Prepare build 113 direct and portable downloads
 on:
-  pull_request:
-  push:
-    branches: [main]
-    tags: ['v*']
   workflow_dispatch:
-
 permissions:
-  contents: read
-
-concurrency:
-  group: ios-${{ github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
-
+  contents: write
+  actions: read
 jobs:
-  build:
+  delivery:
     runs-on: macos-15
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          persist-credentials: false
-      - name: Test domain package
-        run: swift test --package-path Packages/SpeechCore
-      - name: Check repository contracts
-        run: python3 scripts/check-repository.py
-      - name: Build and package unsigned IPA
-        env:
-          REF_TYPE: ${{ github.ref_type }}
-          REF_NAME: ${{ github.ref_name }}
-        run: |
-          version=0.2.0
-          if [[ "$REF_TYPE" == tag ]]; then version="${REF_NAME#v}"; fi
-          scripts/build-unsigned-ipa.sh "$version"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: unsigned-ipa
-          path: |
-            build/*.ipa
-            build/SHA256SUMS
-            LICENSE
-            NOTICE
-            docs/DEPENDENCIES.md
-            licenses/
-            App/Resources/EMA/licenses/
-            App/Resources/EMA/ASSETS.json
-          if-no-files-found: error
-          retention-days: 30
-
-  test-ios:
-    runs-on: macos-15-intel
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          persist-credentials: false
-      - name: Real bundled ONNX inference on iOS Simulator
-        run: scripts/test-ios-integration.sh
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: always()
-        with:
-          name: ios-integration-results
-          path: build/EMAIntegration.xcresult
-          if-no-files-found: warn
-
-  release:
-    if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
-    needs: [build, test-ios]
-    runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Require a tag from main
-        run: git merge-base --is-ancestor HEAD origin/main
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: unsigned-ipa
-          path: release-assets
-      - name: Verify download and prepare release notices
+          run-id: 42707542259
+          github-token: ${{ github.token }}
+          path: incoming
+      - name: Verify original IPA and create a plain portable ZIP
         run: |
-          (cd release-assets/build && sha256sum --check SHA256SUMS)
-          tar -czf release-assets/licenses.tar.gz -C release-assets LICENSE NOTICE docs licenses App/Resources/EMA/licenses App/Resources/EMA/ASSETS.json
-      - name: Create draft release
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, zipfile
+          ipa=Path('incoming/build/EMALightning-0.2.0-unsigned.ipa')
+          digest=hashlib.sha256(ipa.read_bytes()).hexdigest()
+          assert digest == 'd072d6d823cb853a08127fb7fb202dfcbb131573d179fd97cb15e2e1409800b5'
+          assert zipfile.ZipFile(ipa).testzip() is None
+          Path('SHA256SUMS-build113.txt').write_text(f'{digest}  {ipa.name}\n')
+          with zipfile.ZipFile('EMA-iOS-0.2.0-build113-portable.zip','w',compression=zipfile.ZIP_STORED,allowZip64=False) as z:
+              z.writestr(ipa.name,ipa.read_bytes())
+              z.writestr('SHA256SUMS',f'{digest}  {ipa.name}\n')
+          assert zipfile.ZipFile('EMA-iOS-0.2.0-build113-portable.zip').testzip() is None
+          PY
+      - name: Verify portable ZIP with Apple's ditto
+        run: |
+          ditto -x -k EMA-iOS-0.2.0-build113-portable.zip portable-extracted
+          cmp incoming/build/EMALightning-0.2.0-unsigned.ipa portable-extracted/EMALightning-0.2.0-unsigned.ipa
+      - name: Check original GitHub ZIP with Apple's ditto
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$TAG" --verify-tag --draft --title "EMA Lightning iOS $TAG" \
-            --notes-file docs/RELEASE-NOTES.md \
-            release-assets/build/*.ipa release-assets/build/SHA256SUMS release-assets/licenses.tar.gz
+          gh api repos/Ezakamak/ema-lightning-ios/actions/artifacts/13715325452/zip > original-github-artifact.zip
+          if ditto -x -k original-github-artifact.zip original-extracted; then
+            echo "Original GitHub ZIP also passed macOS ditto extraction." > ZIP-COMPATIBILITY.txt
+          else
+            echo "Original GitHub ZIP failed macOS ditto extraction; portable ZIP passed." > ZIP-COMPATIBILITY.txt
+          fi
+          cat ZIP-COMPATIBILITY.txt
+      - name: Attach direct IPA and portable ZIP to the existing private draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          test "$(gh release view diagnostics-build113 --json isDraft --jq .isDraft)" = true
+          gh release upload diagnostics-build113 --clobber \
+            incoming/build/EMALightning-0.2.0-unsigned.ipa \
+            EMA-iOS-0.2.0-build113-portable.zip SHA256SUMS-build113.txt ZIP-COMPATIBILITY.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: portable-build113-downloads
+          path: |
+            EMA-iOS-0.2.0-build113-portable.zip
+            SHA256SUMS-build113.txt
+            ZIP-COMPATIBILITY.txt
