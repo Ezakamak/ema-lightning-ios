@@ -47,6 +47,13 @@ final class EMAIntegrationTests: XCTestCase {
     @MainActor
     func testCancelledInferenceCanRestart() async throws {
         let engine = EMASpeechEngine()
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        let controller = UIViewController()
+        window.rootViewController = controller
+        window.makeKeyAndVisible()
+        controller.view.addSubview(engine.webView)
+        engine.webView.frame = CGRect(x: 0, y: 0, width: 8, height: 8)
+        defer { engine.stop(); window.isHidden = true }
         let request = try SpeechRequest(text: "Merhaba dünya.")
         let render = Task { try await engine.render(request) }
         try await Task.sleep(for: .milliseconds(100))

@@ -65,6 +65,7 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate {
         let renderID = UUID()
         activeRender = renderID
         let current = generation
+        print("EMA: loading bundled inference page")
         let timer = Task { [weak self] in
             do { try await Task.sleep(for: .seconds(180)) } catch { return }
             self?.invalidate(error: EngineError.timedOut)
@@ -76,6 +77,7 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate {
         }
         try await loadPage()
         guard generation == current else { throw CancellationError() }
+        print("EMA: starting bundled ONNX synthesis")
         let value = try await webView.callAsyncJavaScript(
             "if (!window.emaReady) throw new Error('EMA bridge not ready'); return await window.synthesize(text);",
             arguments: ["text": request.text], in: nil, contentWorld: .page)
@@ -87,6 +89,7 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate {
               let rate = result["sampleRate"] as? Int, rate == 48000,
               let rms = result["rms"] as? Double, rms.isFinite, rms > 1e-5,
               let normalized = result["normalized"] as? String else { throw EngineError.invalidAudio }
+        print("EMA: rendered \(count) samples at \(rate) Hz")
         return RenderedSpeech(wav: wav, sampleCount: count, sampleRate: rate, rms: rms, normalizedText: normalized)
     }
 

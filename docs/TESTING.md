@@ -10,7 +10,7 @@
 
 ## Simulator compatibility note
 
-The Xcode 16.4 / iOS 18.5 simulator failed before running any tests because of missing `libswiftWebKit.dylib`, matching [WebKit bug 293831](https://bugs.webkit.org/show_bug.cgi?id=293831). The integration test command applies the documented `IPHONEOS_DEPLOYMENT_TARGET=18.4` workaround **only to simulator test builds**. Device IPA archives still target iOS 17. This simulator run therefore does not establish iOS 17 device compatibility. No tests are skipped to apply this workaround.
+The Xcode 16.4 / iOS 18.5 simulator failed before running any tests because of missing `libswiftWebKit.dylib`, matching [WebKit bug 293831](https://bugs.webkit.org/show_bug.cgi?id=293831). The integration test command applies the documented `IPHONEOS_DEPLOYMENT_TARGET=18.4` workaround **only to simulator test builds**. Device IPA archives still target iOS 17. This simulator run therefore does not establish iOS 17 device compatibility. No tests are skipped to apply this workaround. The simulator is booted explicitly, tests launch without attaching a debugger and simulator binaries use ad-hoc signing (no Apple identity/certificate). This avoids an observed hosted-runner stall waiting for the debugger before any test started. Device archives remain unsigned.
 
 ## Observed locally (2026-11-09)
 
