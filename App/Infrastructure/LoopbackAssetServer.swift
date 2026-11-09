@@ -41,12 +41,15 @@ final class LoopbackAssetServer {
                     }
                     self.startTimeout?.cancel()
                     resumed = true
+                    listener.stateUpdateHandler = nil
                     continuation.resume(returning: URL(string: "http://127.0.0.1:\(port.rawValue)/\(self.token)/index.html")!)
                 case .failed(let error):
                     resumed = true
+                    listener.stateUpdateHandler = nil
                     continuation.resume(throwing: error)
                 case .cancelled:
                     resumed = true
+                    listener.stateUpdateHandler = nil
                     continuation.resume(throwing: timedOut ? NWError.posix(.ETIMEDOUT) : CancellationError())
                 default: break
                 }

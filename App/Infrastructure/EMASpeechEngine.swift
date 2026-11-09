@@ -257,7 +257,10 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
     private func abort(_ id: UUID, error: Error, preferred: EMAStage? = nil) {
         guard let op = active, op.id == id else { return }
         if error is CancellationError { diagnostics.cancel(id: op.diagnosticID) }
-        else { diagnostics.fail(preferred ?? diagnostics.currentStage ?? .engine, error: describe(error), id: op.diagnosticID) }
+        else {
+            let waiting = EMAStage.allCases.dropFirst(2).first { diagnostics.trace?.records[$0]?.status == .waiting }
+            diagnostics.fail(preferred ?? diagnostics.currentStage ?? waiting ?? .completed, error: describe(error), id: op.diagnosticID)
+        }
         // Clear every Swift wait independently of JavaScript or a responsive WebContent process.
         let loading = op.load; op.load = nil
         let javascript = op.javascript; op.javascript = nil
@@ -279,6 +282,8 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
         player?.delegate = nil; player?.stop(); player = nil
         webView.stopLoading()
         webView.evaluateJavaScript("window.cancelSynthesis?.('\(op.id.uuidString)')")
+        // Navigation also tears down workers if WebKit cannot execute the cancellation script.
+        webView.loadHTMLString("<!doctype html><title>EMA durduruldu</title>", baseURL: nil)
     }
     private func describe(_ error: Error) -> String {
         let ns = error as NSError
@@ -342,6 +347,7 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
     }
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if navigationAction.request.url?.absoluteString == "about:blank" { decisionHandler(.allow); return }
         guard let op = active, let url = navigationAction.request.url, let origin = op.origin,
               url.scheme == "http", url.host == "127.0.0.1", url.port == origin.port,
               url.path.hasPrefix(origin.deletingLastPathComponent().path + "/") else {
