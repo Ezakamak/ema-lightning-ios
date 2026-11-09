@@ -17,13 +17,13 @@
   "files": [
     {
       "path": "bridge.js",
-      "bytes": 973,
-      "sha256": "a8ecebbc7eb067e1f4e75d10d7e7cb29ff387bd9ebc71a64b8f816b55e79ef54"
+      "bytes": 3590,
+      "sha256": "8ea337fbe04c1da2458c2d89a0410ba87bd8cd5b7100ea2b2e97742c6942feb7"
     },
     {
       "path": "index.html",
-      "bytes": 162,
-      "sha256": "2373d1489e8cb515c547e63a211e8591c3be7c240d59859e7a2cd8c98e70eda6"
+      "bytes": 300,
+      "sha256": "72fdbd6730534f3cf0e00b405c6171a9e5e88b365fd62aef8f48ae31343047b8"
     },
     {
       "path": "licenses/ema-lightning-LICENSE",
@@ -351,14 +351,39 @@
       "sha256": "219e6a1fc8a9938268d18efca3c91d310bd2f4a59bbd13744df5b2b7fc6cee3b"
     },
     {
+      "path": "telemetry.js",
+      "bytes": 1373,
+      "sha256": "d3d137ede5c548464c130eaadb2bf934ec0281bd08616845819bf3be0ec0461f"
+    },
+    {
+      "path": "test-fixtures/stalled-worker.js",
+      "bytes": 145,
+      "sha256": "d1438532b53756d3a588d9bf205269fa98078afa96ea62034be42c50a4bcb624"
+    },
+    {
+      "path": "test-fixtures/throw-worker.js",
+      "bytes": 120,
+      "sha256": "8d76b388ce56bbc81e5c2da991b4f78ea53b43a654960206dc2fd7cf1040c1c9"
+    },
+    {
+      "path": "test-fixtures/unresolved-worker.js",
+      "bytes": 266,
+      "sha256": "8a3211b615052476665cbe345bce918de6e9912d19304596d12446dca1ed0459"
+    },
+    {
       "path": "tts.js",
-      "bytes": 11878,
-      "sha256": "77ac22269e7a2700b018f9d411fdfe61ab82bd81c665eccb3b4ce30d0003546e"
+      "bytes": 12321,
+      "sha256": "28c9aee8880670b3f10a4cbb5b4f274270204151faa6831f026ec6245f02869c"
+    },
+    {
+      "path": "viewport.css",
+      "bytes": 154,
+      "sha256": "bd5b58aa06914c2abf6ba1f794dd35cdecbdc15230ea0f48f82d034913a9fda7"
     },
     {
       "path": "worker.js",
-      "bytes": 1598,
-      "sha256": "7bbddcda9174f71b40612c55554ba0513ad35c5a345f4ebcec1a6bd44e53480c"
+      "bytes": 2703,
+      "sha256": "3894941dcb12cc119b5d8e771aa8a91355ba962444a47b080e7cd109f0392c0d"
     }
   ]
 }

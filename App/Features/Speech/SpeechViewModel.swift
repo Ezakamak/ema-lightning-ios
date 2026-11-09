@@ -15,33 +15,73 @@ final class SpeechViewModel: ObservableObject {
     @Published var choice: EngineChoice = .ema { didSet { stop() } }
     @Published var errorMessage: String?
     @Published private(set) var isGenerating = false
-    let ema = EMASpeechEngine()
-    private let system = SystemSpeechEngine()
+    let diagnostics: EMADiagnostics
+    let ema: EMASpeechEngine
+    private var system: SystemSpeechEngine?
     private var task: Task<Void, Never>?
+    private var requestID: UUID?
+    private let injectedAction: ((SpeechRequest, UUID) async throws -> Void)?
+
+    init(fault: EMATestFault = .none, timing: EMATiming = EMATiming(),
+         action: ((SpeechRequest, UUID) async throws -> Void)? = nil) {
+        let diagnostics = EMADiagnostics()
+        self.diagnostics = diagnostics
+        ema = EMASpeechEngine(diagnostics: diagnostics, timing: timing, fault: fault)
+        injectedAction = action
+    }
 
     func speak() {
-        stop()
+        guard !isGenerating else { return }
+        // This receipt is published synchronously, before validation, WebKit or Task creation.
+        let id = diagnostics.begin(engine: choice.rawValue, input: text)
+        requestID = id
+        diagnostics.update(.button, .running, id: id)
+        diagnostics.update(.button, .success, id: id)
+        diagnostics.update(.validation, .running, id: id)
         let request: SpeechRequest
-        do { request = try SpeechRequest(text: text) }
-        catch { errorMessage = error.localizedDescription; return }
+        do {
+            request = try SpeechRequest(text: text)
+            diagnostics.update(.validation, .success, id: id)
+        } catch {
+            diagnostics.fail(.validation, error: error.localizedDescription, id: id)
+            errorMessage = diagnostics.clean(error.localizedDescription)
+            return
+        }
         errorMessage = nil
         isGenerating = true
-        let engine: any SpeechEngine = choice == .ema ? ema : system
+        let selected = choice
         task = Task { [weak self] in
-            do { try await engine.speak(request) }
-            catch is CancellationError { }
+            await Task.yield() // Give SwiftUI a rendering opportunity before engine initialization.
+            guard let self, self.requestID == id, !Task.isCancelled else { return }
+            defer { if self.requestID == id { self.isGenerating = false; self.task = nil } }
+            do {
+                if let action = self.injectedAction { try await action(request, id) }
+                else if selected == .ema { try await self.ema.speak(request, diagnosticID: id) }
+                else {
+                    self.diagnostics.note("Apple sistem sesi açıkça seçildi; EMA aşamaları çalıştırılmıyor.", id: id)
+                    if self.system == nil { self.system = SystemSpeechEngine() }
+                    try await self.system?.speak(request)
+                }
+            } catch is CancellationError { self.diagnostics.cancel(id: id) }
             catch {
-                if !Task.isCancelled { self?.errorMessage = error.localizedDescription }
+                guard self.requestID == id, !Task.isCancelled else { return }
+                let detail = self.diagnostics.trace?.firstFailure.flatMap { self.diagnostics.trace?.records[$0]?.detail } ?? self.diagnostics.clean(error.localizedDescription)
+                self.errorMessage = detail
+                if self.diagnostics.trace?.firstFailure == nil {
+                    self.diagnostics.fail(self.diagnostics.currentStage ?? .engine, error: detail, id: id)
+                }
             }
-            if !Task.isCancelled { self?.isGenerating = false }
         }
     }
 
     func stop() {
-        task?.cancel()
-        task = nil
-        ema.stop()
-        system.stop()
+        if let id = requestID, isGenerating {
+            diagnostics.note("Durdur çağrısı alındı", id: id)
+            diagnostics.cancel(id: id)
+        }
+        task?.cancel(); task = nil
+        ema.stop(); system?.stop()
         isGenerating = false
+        requestID = nil
     }
 }

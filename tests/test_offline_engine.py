@@ -11,7 +11,7 @@ class Handler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(ASSETS), **kwargs)
     def log_message(self, *args): pass
     def end_headers(self):
-        self.send_header('Content-Security-Policy', "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'")
+        self.send_header('Content-Security-Policy', "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; worker-src 'self'; connect-src 'self'")
         super().end_headers()
 
 server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
@@ -34,6 +34,7 @@ try:
         page = context.new_page()
         page.on('console', lambda m: print('browser:', m.type, m.text[:500], flush=True))
         page.on('pageerror', lambda e: print('browser error:', e, flush=True))
+        page.add_init_script("window.emaTestEvents = []; window.addEventListener('ema-diagnostic', e => window.emaTestEvents.push(e.detail));")
         page.goto(origin + '/index.html')
         page.wait_for_function('window.emaReady === true')
         results = []
@@ -48,6 +49,17 @@ try:
             (out / f'ema-{i}.wav').write_bytes(audio)
             results.append({'input': text, **result})
             print(json.dumps(results[-1], ensure_ascii=False), flush=True)
+        events = page.evaluate('window.emaTestEvents')
+        for stage in ['worker', 'runtime', 'normalizer', 'textModel', 'soundModel', 'decoderModel', 'normalization', 'synthesis', 'wav']:
+            assert any(e.get('stage') == stage and e.get('status') == 'running' for e in events), stage
+            assert any(e.get('stage') == stage and e.get('status') == 'success' for e in events), stage
+        # Real Worker failures and unresolved promises must reject, preserve details and recover.
+        for file, expected in [('missing-worker.js', 'Worker'), ('test-fixtures/throw-worker.js', 'EMA_TEST_WORKER_ERROR'), ('test-fixtures/stalled-worker.js', 'zaman aşımı'), ('test-fixtures/unresolved-worker.js', 'zaman aşımı')]:
+            error = page.evaluate("""async ([workerFile]) => {
+              try { await window.synthesize('Merhaba.', crypto.randomUUID(), {workerFile, bootTimeoutMs: 300, timeoutMs: 500}); return ''; }
+              catch(e) { return String(e.message); }
+            }""", [file])
+            assert expected.lower() in error.lower(), (file, error)
         # Cancellation must reject the request and allow a fresh worker/session afterwards.
         assert page.evaluate('''async () => {
           const promise = window.synthesize('İptal edilecek uzun bir metin.').then(() => false, () => true);
