@@ -1,24 +1,32 @@
 # Architecture
 
-Dependency direction: SwiftUI → SpeechViewModel → SpeechCore.SpeechEngine ← SystemSpeechEngine.
+Default inference path:
+
+SwiftUI → SpeechViewModel → SpeechRequest → EMASpeechEngine → WKWebView → module Web Worker → bundled normalizer + ONNX CPU/WASM → 48 kHz WAV → AVAudioPlayer.
+
+Apple AVSpeechSynthesizer is a separate **explicitly selected alternative**, never an automatic fallback or a substitute for EMA test output.
 
 | Location | Responsibility |
 | --- | --- |
-| App/Application | Composition root; owns engine and screen lifetime |
-| App/Features/Speech | Editor, accessibility labels, user actions and error presentation |
-| Packages/SpeechCore | UI-independent request validation and engine contract; Swift Package tests |
-| App/Infrastructure | AVFoundation adapter for the explicitly labeled system voice preview |
-| App/Resources | Licenses and notices shipped inside the app |
-| scripts | Repeatable packaging and repository checks |
+| App/Application | Composition root and foreground lifecycle |
+| App/Features/Speech | Engine choice (EMA by default), editor, progress, cancellation and errors |
+| Packages/SpeechCore | Request validation (1,000 graphemes) and async engine contract |
+| App/Infrastructure/EMASpeechEngine.swift | Main-actor WebKit lifecycle, validated WAV bridge and native playback |
+| App/Infrastructure/LoopbackAssetServer.swift | Bundled read-only assets over ephemeral IPv4 loopback HTTP, random path token |
+| App/Resources/EMA | Pinned real model graphs, normalizer, CPU runtime, JS pipeline, notices and hashes |
+| IntegrationTests | Hosted iOS tests executing the production engine and decoding real WAV with AVFoundation |
+| tests/test_offline_engine.py | Linux Chromium inference with all non-loopback requests blocked |
 
-The composition root injects the engine. No view creates a runtime, downloads a model or reads secrets. UI and the current engine run on the main actor; synthesis is scheduled by AVFoundation. The app stops speech when it leaves the active scene. It does not request a microphone or add a background audio mode.
+## Runtime choice and offline behavior
 
-## Native EMA integration roadmap
+This implementation uses ONNX Runtime **Web (WASM)** inside Apple's WKWebView, not a Swift/Objective-C ONNX Runtime binding. This reuses Özcan Çelik's actual frontend/frame planner/decoder pipeline and normalizer WASM, rather than introducing an unverified Turkish frontend port. Only the CPU backend is enabled; it uses one thread and no WebGPU or SharedArrayBuffer requirement.
 
-1. Review a specific model/export revision, all model licenses, ONNX Runtime binary/transitive notices, normalizer dependencies and device resource requirements. Record hashes and provenance before bundling anything.
-2. Implement an EMA adapter behind `SpeechEngine`. Keep tokenization/normalization, model loading, inference and audio playback in separate components. Heavy inference must run off the main actor with cancellation and bounded memory.
-3. Compare Turkish normalization, tensor shapes, sample rate and audio against upstream fixtures. Measure physical iPhone memory/latency and test offline behavior.
-4. Extend the contract with observable progress/completion and cancellation if asynchronous model loading requires it. Add fake-engine view model tests and integration tests for the real adapter.
-5. Update UI labels, documentation, dependency audit and shipped notices together. Do not relabel the system voice preview as EMA output.
+All assets live in the app bundle. An in-process Network.framework listener is bound to `127.0.0.1` only; it is not a remote inference service or a LAN listener. Standard loopback HTTP allows WebKit to load ES modules and WASM reliably. ATS permits local networking only. A CSP permits scripts, workers and fetches from the same origin, navigation is restricted to the token path, and no external URL occurs in the application bridge/worker. No model requests go to the internet.
 
-No native EMA quality, speed, offline model execution or binary compatibility claim is made by the current preview.
+The worker loads sessions on first request, retains them for repeated requests, normalizes and chunks Turkish text, runs text/sound/decoder graphs and returns PCM16 WAV. Heavy inference runs outside the Swift/UI thread. WAV output is finite/non-silent checked before native playback. The current version waits for the whole utterance; it does not stream playback. Input is capped at 1,000 characters, output at 180 seconds, and a 180-second operation timeout limits stalled work.
+
+Stop, engine changes and leaving the foreground cancel the worker and stop audio. The next request reloads the worker/page as needed. WebContent termination reports an error and allows restart. Model failure never silently selects Apple's voice. A nonpersistent WebKit data store prevents reliance on a previous online cache.
+
+## Remaining validation
+
+Physical iPhone airplane mode, cold launch after installation, audible quality, memory/thermal behavior and long-text cancellation must be checked on real hardware before a stable release. Browser and simulator inference cannot establish those device properties. See TESTING.md for recorded evidence and limitations.

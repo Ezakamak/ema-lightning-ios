@@ -8,4 +8,4 @@
 
 No signing secrets are needed. The release job alone gets contents:write. The workflow does not merge PRs or publish drafts automatically. Re-running an already-created tag release fails rather than replacing assets; inspect and manage the existing draft explicitly, or use a new version if code changed.
 
-For manual Actions runs use main or a review branch; manual runs build artifacts but do not create a release. The first release should remain a clearly described foundation/preview until native EMA integration and device validation are complete.
+For manual Actions runs use main or a review branch; manual runs build artifacts but do not create a release. A preview must state the remaining physical-device validation gaps in docs/TESTING.md. Do not publish a stable/device-verified release until airplane-mode cold launch, audible EMA output and device resource checks pass.
