@@ -25,8 +25,6 @@ jobs:
         run: swift test --package-path Packages/SpeechCore
       - name: Check repository contracts
         run: python3 scripts/check-repository.py
-      - name: Real bundled ONNX inference on iOS Simulator
-        run: scripts/test-ios-integration.sh
       - name: Build and package unsigned IPA
         env:
           REF_TYPE: ${{ github.ref_type }}
@@ -50,6 +48,15 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  test-ios:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Real bundled ONNX inference on iOS Simulator
+        run: scripts/test-ios-integration.sh
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
@@ -59,7 +66,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
-    needs: build
+    needs: [build, test-ios]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
