@@ -13,7 +13,7 @@ final class SystemSpeechEngine: SpeechEngine {
     let displayName = "Apple Türkçe sistem sesi"
     private let synthesizer = AVSpeechSynthesizer()
 
-    func speak(_ request: SpeechRequest) throws {
+    func speak(_ request: SpeechRequest) async throws {
         guard let voice = AVSpeechSynthesisVoice(language: "tr-TR") else {
             throw EngineError.turkishVoiceUnavailable
         }

@@ -25,6 +25,8 @@ jobs:
         run: swift test --package-path Packages/SpeechCore
       - name: Check repository contracts
         run: python3 scripts/check-repository.py
+      - name: Real bundled ONNX inference on iOS Simulator
+        run: scripts/test-ios-integration.sh
       - name: Build and package unsigned IPA
         env:
           REF_TYPE: ${{ github.ref_type }}
@@ -43,8 +45,17 @@ jobs:
             NOTICE
             docs/DEPENDENCIES.md
             licenses/
+            App/Resources/EMA/licenses/
+            App/Resources/EMA/ASSETS.json
           if-no-files-found: error
           retention-days: 30
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: ios-integration-results
+          path: build/EMAIntegration.xcresult
+          if-no-files-found: warn
 
   release:
     if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
@@ -67,7 +78,7 @@ jobs:
       - name: Verify download and prepare release notices
         run: |
           (cd release-assets/build && sha256sum --check SHA256SUMS)
-          tar -czf release-assets/licenses.tar.gz -C release-assets LICENSE NOTICE docs licenses
+          tar -czf release-assets/licenses.tar.gz -C release-assets LICENSE NOTICE docs licenses App/Resources/EMA/licenses App/Resources/EMA/ASSETS.json
       - name: Create draft release
         env:
           GH_TOKEN: ${{ github.token }}

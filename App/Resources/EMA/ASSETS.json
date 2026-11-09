@@ -1,0 +1,364 @@
+{
+  "web_source": {
+    "repository": "https://github.com/ozcancelik/ema-lightning-web",
+    "commit": "a9a688b19badc36486cdc2444ba957bc63ac860e"
+  },
+  "normalizer_source": {
+    "repository": "https://github.com/erdemtuna/normalizer-tr",
+    "commit": "d0bc1bc6523faa4f6257642190bb723b7f4274a5"
+  },
+  "model_card_revision": "e7c96f2fc0ba843cd0f86e02786655bb56f50df8",
+  "runtime": {
+    "package": "onnxruntime-web",
+    "version": "1.30.0",
+    "source_commit": "f2c39fe2f838cf35ce7da92824f5a5e3ee6e88a7",
+    "npm_integrity": "sha512-q0y+JrrtukXSzsBWEMccVfqX25LRmosXHF+CaRJmg8pZClzcV7svNc4rKY3jL02Vb7QmRMDs1SigqR4CXAfKYQ=="
+  },
+  "files": [
+    {
+      "path": "bridge.js",
+      "bytes": 973,
+      "sha256": "a8ecebbc7eb067e1f4e75d10d7e7cb29ff387bd9ebc71a64b8f816b55e79ef54"
+    },
+    {
+      "path": "index.html",
+      "bytes": 162,
+      "sha256": "2373d1489e8cb515c547e63a211e8591c3be7c240d59859e7a2cd8c98e70eda6"
+    },
+    {
+      "path": "licenses/ema-lightning-LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "licenses/ema-lightning-web-LICENSE",
+      "bytes": 11356,
+      "sha256": "5c9817c129b98e7bb966bca028c43c19107102ef8e03fe799bffb4354f4ef015"
+    },
+    {
+      "path": "licenses/ema-lightning-web-NOTICE",
+      "bytes": 1139,
+      "sha256": "edea30454a87856db23d44f12fd4d4d11f89ef61e0570f15a4013e0373039c37"
+    },
+    {
+      "path": "licenses/model-card.md",
+      "bytes": 18025,
+      "sha256": "4ebc1f6e762eb070760c08b960940776a53cc0aec2aac32021bf203eaa2f61fa"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/aho-corasick-1.1.5/COPYING",
+      "bytes": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/aho-corasick-1.1.5/LICENSE-MIT",
+      "bytes": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/heck-0.5.0/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/heck-0.5.0/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/libc-0.2.189/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/libc-0.2.189/LICENSE-MIT",
+      "bytes": 1066,
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/memchr-2.8.3/COPYING",
+      "bytes": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/memchr-2.8.3/LICENSE-MIT",
+      "bytes": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/portable-atomic-1.15.0/LICENSE-APACHE",
+      "bytes": 10174,
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/portable-atomic-1.15.0/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/proc-macro2-1.0.107/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/proc-macro2-1.0.107/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/pyo3-0.29.3/LICENSE-APACHE",
+      "bytes": 9807,
+      "sha256": "32c76dbe0e73d79100d5ece77c158399f2e2541bc5c78548a4ba45c1cb53c5c9"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/pyo3-0.29.3/LICENSE-MIT",
+      "bytes": 1107,
+      "sha256": "afcbe3b2e6b37172b5a9ca869ee4c0b8cdc09316e5d4384864154482c33e5af6"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/pyo3-build-config-0.29.3/LICENSE-APACHE",
+      "bytes": 9807,
+      "sha256": "32c76dbe0e73d79100d5ece77c158399f2e2541bc5c78548a4ba45c1cb53c5c9"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/pyo3-build-config-0.29.3/LICENSE-MIT",
+      "bytes": 1107,
+      "sha256": "afcbe3b2e6b37172b5a9ca869ee4c0b8cdc09316e5d4384864154482c33e5af6"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/pyo3-ffi-0.29.3/LICENSE-APACHE",
+      "bytes": 9807,
+      "sha256": "32c76dbe0e73d79100d5ece77c158399f2e2541bc5c78548a4ba45c1cb53c5c9"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/pyo3-ffi-0.29.3/LICENSE-MIT",
+      "bytes": 1107,
+      "sha256": "afcbe3b2e6b37172b5a9ca869ee4c0b8cdc09316e5d4384864154482c33e5af6"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/pyo3-macros-0.29.3/LICENSE-APACHE",
+      "bytes": 9807,
+      "sha256": "32c76dbe0e73d79100d5ece77c158399f2e2541bc5c78548a4ba45c1cb53c5c9"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/pyo3-macros-0.29.3/LICENSE-MIT",
+      "bytes": 1107,
+      "sha256": "afcbe3b2e6b37172b5a9ca869ee4c0b8cdc09316e5d4384864154482c33e5af6"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/pyo3-macros-backend-0.29.3/LICENSE-APACHE",
+      "bytes": 9807,
+      "sha256": "32c76dbe0e73d79100d5ece77c158399f2e2541bc5c78548a4ba45c1cb53c5c9"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/pyo3-macros-backend-0.29.3/LICENSE-MIT",
+      "bytes": 1107,
+      "sha256": "afcbe3b2e6b37172b5a9ca869ee4c0b8cdc09316e5d4384864154482c33e5af6"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/quote-1.0.47/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/quote-1.0.47/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/regex-1.13.1/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/regex-1.13.1/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/regex-automata-0.4.18/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/regex-automata-0.4.18/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/regex-syntax-0.8.11/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/regex-syntax-0.8.11/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/rust-std-1.99.0/COPYRIGHT-library.html",
+      "bytes": 1499465,
+      "sha256": "5647be074c8edf7339fd863055923a8fc80bc5610a8d4661ec3b767b9d392c27"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/rust-std-1.99.0/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/rust-std-1.99.0/LICENSE-MIT",
+      "bytes": 1068,
+      "sha256": "b71bd43a069ca0641a9ecfe585ca7b3c53b5cc1608f8b68321168698e28b5ea1"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/syn-2.0.119/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/syn-2.0.119/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/syn-3.0.6/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/syn-3.0.6/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/target-lexicon-0.13.5/LICENSE",
+      "bytes": 12243,
+      "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/tinyvec-1.13.3/LICENSE-APACHE.md",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/tinyvec-1.13.3/LICENSE-MIT.md",
+      "bytes": 1023,
+      "sha256": "fd80a26fbb3f644af1fa994134446702932968519797227e07a1368dea80f0bc"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/tinyvec-1.13.3/LICENSE-ZLIB.md",
+      "bytes": 851,
+      "sha256": "84b34dd7608f7fb9b17bd588a6bf392bf7de504e2716f024a77d89f1b145a151"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/unicode-ident-1.0.26/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/unicode-ident-1.0.26/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/unicode-ident-1.0.26/LICENSE-UNICODE",
+      "bytes": 1995,
+      "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/unicode-normalization-0.1.25/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/unicode-normalization-0.1.25/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/unicode-segmentation-1.13.3/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "path": "licenses/normalizer-dependencies/unicode-segmentation-1.13.3/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0"
+    },
+    {
+      "path": "licenses/normalizer-tr-LICENSE",
+      "bytes": 11356,
+      "sha256": "5c9817c129b98e7bb966bca028c43c19107102ef8e03fe799bffb4354f4ef015"
+    },
+    {
+      "path": "licenses/normalizer-tr-THIRD_PARTY_NOTICES.md",
+      "bytes": 7251,
+      "sha256": "978e0b5c33ecb5d89970e035727cd70f1d76a18e21de8ea7b37596d6424c0d81"
+    },
+    {
+      "path": "licenses/onnxruntime-LICENSE",
+      "bytes": 1073,
+      "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"
+    },
+    {
+      "path": "licenses/onnxruntime-ThirdPartyNotices.txt",
+      "bytes": 338088,
+      "sha256": "143764b952fdb1a7c69ce653bfba74a7744d6a8a573bfb73e235fba356c83de3"
+    },
+    {
+      "path": "models/decoder.onnx",
+      "bytes": 12031945,
+      "sha256": "396c06a8e5711fd40bfd2c3f4f33851feb2ad07a86485833844e0ae8ff637b17"
+    },
+    {
+      "path": "models/meta.json",
+      "bytes": 357,
+      "sha256": "76627201405723633f5319a208ed7dea63c42acbf3ca997671bccdca9d9186b2"
+    },
+    {
+      "path": "models/normalizer.wasm",
+      "bytes": 1211738,
+      "sha256": "2614bcf15b4546249d49474c029420a4a611daf9e9a0c596cc852bd16cdecc89"
+    },
+    {
+      "path": "models/sound.onnx",
+      "bytes": 18120655,
+      "sha256": "958364217360cecaa92dc5ff2170d19f3c9f6995fd5e61241ea4068971a46a59"
+    },
+    {
+      "path": "models/text.onnx",
+      "bytes": 4806400,
+      "sha256": "ad5d4885b5d218f63d976a6e562334ea0194aec54847a6c6482d328e784089f0"
+    },
+    {
+      "path": "normalizer.js",
+      "bytes": 944,
+      "sha256": "24bcddacb45ab2f21d51187f0539074eee47499e67908f2ece41d827dce9b3d9"
+    },
+    {
+      "path": "runtime/ort-wasm-simd-threaded.mjs",
+      "bytes": 24381,
+      "sha256": "e13f7f94fc51b4ca72b12faeb1ee95f4ace6dfbc8939bc718aabdc0a27c4299b"
+    },
+    {
+      "path": "runtime/ort-wasm-simd-threaded.wasm",
+      "bytes": 14239897,
+      "sha256": "3398c10d07d229bd91b364548e130e0e51a8e5704b88c7c083ebbeb78842dee2"
+    },
+    {
+      "path": "runtime/ort.wasm.min.mjs",
+      "bytes": 50126,
+      "sha256": "219e6a1fc8a9938268d18efca3c91d310bd2f4a59bbd13744df5b2b7fc6cee3b"
+    },
+    {
+      "path": "tts.js",
+      "bytes": 11878,
+      "sha256": "77ac22269e7a2700b018f9d411fdfe61ab82bd81c665eccb3b4ce30d0003546e"
+    },
+    {
+      "path": "worker.js",
+      "bytes": 1598,
+      "sha256": "7bbddcda9174f71b40612c55554ba0513ad35c5a345f4ebcec1a6bd44e53480c"
+    }
+  ]
+}

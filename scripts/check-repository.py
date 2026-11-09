@@ -29,3 +29,24 @@ for reference in re.findall(r'\b[0-9A-F]{24}\b', project):
 ET.parse(root / 'EMALightning.xcodeproj/xcshareddata/xcschemes/EMALightning.xcscheme')
 assert 'XCRemoteSwiftPackageReference' not in project, 'Audit new remote dependency first'
 print('Repository packaging and provenance checks passed.')
+
+# Every byte of model/runtime/license payload must match the reviewed asset inventory.
+import hashlib
+import json
+assets = root / 'App/Resources/EMA'
+manifest = json.loads((assets / 'ASSETS.json').read_text())
+recorded = {entry['path'] for entry in manifest['files']}
+actual = {str(p.relative_to(assets)) for p in assets.rglob('*') if p.is_file() and p.name != 'ASSETS.json'}
+assert actual == recorded, 'Asset inventory is incomplete'
+for entry in manifest['files']:
+    data = (assets / entry['path']).read_bytes()
+    assert len(data) == entry['bytes'], entry['path']
+    assert hashlib.sha256(data).hexdigest() == entry['sha256'], entry['path']
+for name in ['models/text.onnx', 'models/sound.onnx', 'models/decoder.onnx',
+             'models/normalizer.wasm', 'runtime/ort.wasm.min.mjs',
+             'runtime/ort-wasm-simd-threaded.mjs', 'runtime/ort-wasm-simd-threaded.wasm']:
+    assert name in recorded, f'Missing inference dependency {name}'
+assert 'http' not in (assets / 'bridge.js').read_text()
+assert 'http' not in (assets / 'worker.js').read_text()
+assert 'https://cdn' not in (assets / 'tts.js').read_text()
+print('Bundled model/runtime/license hashes verified.')
