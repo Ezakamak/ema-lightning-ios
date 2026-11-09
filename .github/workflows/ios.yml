@@ -1,4 +1,4 @@
-name: Prepare build 113 direct and portable downloads
+name: Prepare build 116 direct and portable downloads
 on:
   workflow_dispatch:
 permissions:
@@ -12,7 +12,7 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: unsigned-ipa
-          run-id: 42707542259
+          run-id: 42711479573
           github-token: ${{ github.token }}
           path: incoming
       - name: Verify original IPA and create a plain portable ZIP
@@ -22,24 +22,27 @@ jobs:
           import hashlib, zipfile
           ipa=Path('incoming/build/EMALightning-0.2.0-unsigned.ipa')
           digest=hashlib.sha256(ipa.read_bytes()).hexdigest()
-          assert digest == 'd072d6d823cb853a08127fb7fb202dfcbb131573d179fd97cb15e2e1409800b5'
+          assert digest == 'cbca53927e6083c9e392a456d572e54fa054d8d9e0bb0b053f25889a3522d60a'
           assert zipfile.ZipFile(ipa).testzip() is None
-          Path('SHA256SUMS-build113.txt').write_text(f'{digest}  {ipa.name}\n')
-          with zipfile.ZipFile('EMA-iOS-0.2.0-build113-portable.zip','w',compression=zipfile.ZIP_STORED,allowZip64=False) as z:
+          original=ipa
+          ipa=Path('EMALightning-0.2.0-build116-unsigned.ipa')
+          ipa.write_bytes(original.read_bytes())
+          Path('SHA256SUMS-build116.txt').write_text(f'{digest}  {ipa.name}\n')
+          with zipfile.ZipFile('EMA-iOS-0.2.0-build116-portable.zip','w',compression=zipfile.ZIP_STORED,allowZip64=False) as z:
               z.writestr(ipa.name,ipa.read_bytes())
               z.writestr('SHA256SUMS',f'{digest}  {ipa.name}\n')
-          assert zipfile.ZipFile('EMA-iOS-0.2.0-build113-portable.zip').testzip() is None
+          assert zipfile.ZipFile('EMA-iOS-0.2.0-build116-portable.zip').testzip() is None
           PY
       - name: Verify portable ZIP with Apple's ditto
         run: |
-          ditto -x -k EMA-iOS-0.2.0-build113-portable.zip portable-extracted
-          cmp incoming/build/EMALightning-0.2.0-unsigned.ipa portable-extracted/EMALightning-0.2.0-unsigned.ipa
+          ditto -x -k EMA-iOS-0.2.0-build116-portable.zip portable-extracted
+          cmp incoming/build/EMALightning-0.2.0-unsigned.ipa portable-extracted/EMALightning-0.2.0-build116-unsigned.ipa
       - name: Check original GitHub ZIP with Apple's ditto
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh api repos/Ezakamak/ema-lightning-ios/actions/artifacts/13715325452/zip > original-github-artifact.zip
+          gh api repos/Ezakamak/ema-lightning-ios/actions/artifacts/13716516288/zip > original-github-artifact.zip
           if ditto -x -k original-github-artifact.zip original-extracted; then
             echo "Original GitHub ZIP also passed macOS ditto extraction." > ZIP-COMPATIBILITY.txt
           else
@@ -51,14 +54,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          test "$(gh release view diagnostics-build113 --json isDraft --jq .isDraft)" = true
-          gh release upload diagnostics-build113 --clobber \
-            incoming/build/EMALightning-0.2.0-unsigned.ipa \
-            EMA-iOS-0.2.0-build113-portable.zip SHA256SUMS-build113.txt ZIP-COMPATIBILITY.txt
+          test "$(gh release view diagnostics-build116 --json isDraft --jq .isDraft)" = true
+          gh release upload diagnostics-build116 --clobber \
+            EMALightning-0.2.0-build116-unsigned.ipa \
+            EMA-iOS-0.2.0-build116-portable.zip SHA256SUMS-build116.txt ZIP-COMPATIBILITY.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: portable-build113-downloads
+          name: portable-build116-downloads
           path: |
-            EMA-iOS-0.2.0-build113-portable.zip
-            SHA256SUMS-build113.txt
+            EMA-iOS-0.2.0-build116-portable.zip
+            SHA256SUMS-build116.txt
             ZIP-COMPATIBILITY.txt
