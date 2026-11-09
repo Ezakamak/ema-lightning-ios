@@ -8,6 +8,10 @@
 - `scripts/build-unsigned-ipa.sh 0.1.0`: builds the device IPA and verifies every asset hash inside the resulting ZIP. No signing secrets needed.
 - `python3 tests/test_offline_engine.py`: Linux with Python Playwright and `/usr/bin/chromium`. Starts a loopback-only asset server, blocks and records every non-loopback request, uses a fresh browser context and runs actual text/sound/decoder sessions. Saves WAVs and JSON under `build/offline-engine/`. It is not an iOS test.
 
+## Simulator compatibility note
+
+The Xcode 16.4 / iOS 18.5 simulator failed before running any tests because of missing `libswiftWebKit.dylib`, matching [WebKit bug 293831](https://bugs.webkit.org/show_bug.cgi?id=293831). The integration test command applies the documented `IPHONEOS_DEPLOYMENT_TARGET=18.4` workaround **only to simulator test builds**. Device IPA archives still target iOS 17. This simulator run therefore does not establish iOS 17 device compatibility. No tests are skipped to apply this workaround.
+
 ## Observed locally (2026-11-09)
 
 Real packaged FP32 ONNX models + normalizer + Runtime Web 1.30.0 produced:
