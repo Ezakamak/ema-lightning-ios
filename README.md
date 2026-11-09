@@ -15,6 +15,8 @@ Oluştur · Geçmiş · Ayarlar; yerel kayıt arşivi, MP3 ve ilerleyen metinli 
 paylaşımı, varsayılan kapalı Geliştirici Modu. / Create, local history, MP3 and
 caption-video export, and opt-in developer diagnostics.
 
+[Telaffuz sözlüğü (TR)](docs/PRONUNCIATION.tr.md) · [Pronunciation guide (EN)](docs/PRONUNCIATION.en.md)
+
 [Studio kullanımı (TR)](docs/STUDIO.tr.md) · [Studio guide (EN)](docs/STUDIO.en.md)
 MP4 metin zamanlaması yaklaşıktır; kesin kelime hizalaması değildir.
 MP3 encoder: separate LGPL-3.0 lamejs; application code remains Apache-2.0.

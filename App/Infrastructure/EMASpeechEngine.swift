@@ -75,6 +75,7 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
     let displayName = "EMA Lightning · ONNX / CPU"
     let webView: WKWebView
     let diagnostics: EMADiagnostics
+    let pronunciations: PronunciationStore
     private let timing: EMATiming
     private let fault: EMATestFault
     private var active: Operation?
@@ -82,7 +83,8 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
     private var attachment: CheckedContinuation<Void, Error>?
     private var attachmentID: UUID?
 
-    init(diagnostics: EMADiagnostics? = nil, timing: EMATiming = EMATiming(), fault: EMATestFault = .none) {
+    init(diagnostics: EMADiagnostics? = nil, timing: EMATiming = EMATiming(), fault: EMATestFault = .none, pronunciations: PronunciationStore? = nil) {
+        self.pronunciations = pronunciations ?? PronunciationStore()
         self.diagnostics = diagnostics ?? EMADiagnostics(); self.timing = timing; self.fault = fault
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .nonPersistent()
@@ -101,7 +103,7 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
         webView.loadHTMLString(Self.idleHTML, baseURL: nil)
     }
     private static let idleHTML = """
-    <!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;background:transparent;height:100%;display:grid;place-items:center}div{display:flex;gap:4px;align-items:center}i{display:block;width:5px;background:#e41635;border-radius:3px;height:16px}i:nth-child(2),i:nth-child(4){height:28px}i:nth-child(3){height:38px}</style><div aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;background:transparent;height:100%;display:grid;place-items:center}div{display:flex;gap:2px;align-items:center}i{display:block;width:3px;background:#e41635;border-radius:3px;height:8px}i:nth-child(2),i:nth-child(4){height:14px}i:nth-child(3){height:22px}</style><div aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     """
 
     var hostReady: Bool {
@@ -135,6 +137,8 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
         guard active == nil else { throw Failure(message: "EMA isteği zaten çalışıyor; önce Durdur’a basın.") }
         let traceID = diagnosticID ?? diagnostics.begin(engine: displayName, input: request.text)
         diagnostics.protect(request.text)
+        for value in pronunciations.privateValues { diagnostics.protect(value) }
+        let speechLexicon = pronunciations.effectiveRules.map { ["word": $0.word, "pronunciation": $0.pronunciation] }
         let op = Operation(diagnosticID: traceID)
         active = op
         let operationID = op.id
@@ -169,8 +173,8 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
                 let value: Any = try await withCheckedThrowingContinuation { continuation in
                     op.javascript = continuation
                     // Use our own continuation, not an uncancellable SDK async promise wait.
-                    webView.callAsyncJavaScript("return await window.synthesize(text, requestID, {workerFile: workerFile, bootTimeoutMs: bootTimeout, timeoutMs: promiseTimeout});",
-                        arguments: ["text": request.text, "requestID": operationID.uuidString, "workerFile": fault.workerFile, "bootTimeout": fault == .stalledWorker ? 500 : 20000, "promiseTimeout": fault == .unresolvedPromise ? 800 : 180000],
+                    webView.callAsyncJavaScript("return await window.synthesize(text, requestID, {workerFile: workerFile, bootTimeoutMs: bootTimeout, timeoutMs: promiseTimeout, pronunciations: pronunciations});",
+                        arguments: ["pronunciations": speechLexicon, "text": request.text, "requestID": operationID.uuidString, "workerFile": fault.workerFile, "bootTimeout": fault == .stalledWorker ? 500 : 20000, "promiseTimeout": fault == .unresolvedPromise ? 800 : 180000],
                         in: nil, in: .page) { [weak self] result in
                             guard let self, self.active?.id == operationID else { return }
                             let pending = op.javascript

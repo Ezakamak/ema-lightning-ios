@@ -1,3 +1,9 @@
+> Maintainer preference: test/build/package operations run in GitHub Actions.
+> Full package and simulator tests are now opt-in with workflow_dispatch → run_tests.
+> The pronunciation/UI follow-up is committed with CI skipped: no test or build
+> result is claimed for it. The previous Studio run built successfully but its
+> iOS job was cancelled at the maintainer's request.
+
 # EMA inference validation
 
 ## Repeatable tests

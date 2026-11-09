@@ -11,13 +11,15 @@ enum EngineChoice: String, CaseIterable, Identifiable {
 
 @MainActor
 final class SpeechViewModel: ObservableObject {
-    @Published var text = "Merhaba! EMA Lightning artık kendi modelini kullanıyor."
+    static let exampleText = "Merhaba! Bugün güzel bir fikri sese dönüştürmek için harika bir gün."
+    @Published var text = SpeechViewModel.exampleText
     @Published var choice: EngineChoice = .ema { didSet { stop() } }
     @Published var errorMessage: String?
     @Published private(set) var isGenerating = false
     let diagnostics: EMADiagnostics
     let ema: EMASpeechEngine
     let library: RecordingStore
+    let pronunciations: PronunciationStore
     private var system: SystemSpeechEngine?
     private var task: Task<Void, Never>?
     private var requestID: UUID?
@@ -28,7 +30,9 @@ final class SpeechViewModel: ObservableObject {
         let diagnostics = EMADiagnostics()
         self.diagnostics = diagnostics
         self.library = library ?? RecordingStore()
-        ema = EMASpeechEngine(diagnostics: diagnostics, timing: timing, fault: fault)
+        let pronunciations = PronunciationStore()
+        self.pronunciations = pronunciations
+        ema = EMASpeechEngine(diagnostics: diagnostics, timing: timing, fault: fault, pronunciations: pronunciations)
         injectedAction = action
     }
 

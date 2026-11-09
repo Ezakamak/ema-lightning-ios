@@ -15,7 +15,7 @@ final class EMAIntegrationTests: XCTestCase {
         window.makeKeyAndVisible()
         let host = InferenceHostView(engine: engine)
         controller.view.addSubview(host)
-        host.frame = CGRect(x: 0, y: 0, width: 80, height: 48)
+        host.frame = CGRect(x: 0, y: 0, width: 32, height: 24)
         host.layoutIfNeeded()
         defer { engine.stop(); window.isHidden = true }
 
@@ -106,7 +106,7 @@ final class EMAIntegrationTests: XCTestCase {
         window.makeKeyAndVisible()
         let host = InferenceHostView(engine: engine)
         controller.view.addSubview(host)
-        host.frame = CGRect(x: 0, y: 0, width: 80, height: 48)
+        host.frame = CGRect(x: 0, y: 0, width: 32, height: 24)
         host.layoutIfNeeded()
         defer { engine.stop(); window.isHidden = true }
         let request = try SpeechRequest(text: "Merhaba dünya.")
@@ -159,7 +159,7 @@ final class EMAIntegrationTests: XCTestCase {
             let window = UIWindow(frame: UIScreen.main.bounds)
             let controller = UIViewController(); window.rootViewController = controller; window.makeKeyAndVisible()
             let host = InferenceHostView(engine: engine); controller.view.addSubview(host)
-            host.frame = CGRect(x: 0, y: 0, width: 80, height: 48); host.layoutIfNeeded()
+            host.frame = CGRect(x: 0, y: 0, width: 32, height: 24); host.layoutIfNeeded()
             do { _ = try await engine.render(SpeechRequest(text: "Merhaba.")); XCTFail("Fault must not produce audio: \(fault)") }
             catch {
                 let report = engine.diagnostics.report()

@@ -25,7 +25,7 @@ self.onmessage = async ({ data }) => {
       throw new Error('Invalid text (maximum 1000 user-visible characters)');
     const engine = await EMA.load('wasm', undefined, stage);
     stage('normalization', 'running');
-    const pieces = engine.pieces(data.text, 1);
+    const pieces = engine.pieces(data.text, 1, data.pronunciations ?? []);
     if (!pieces.length) throw new Error('Metinde okunabilir Türkçe sözcük bulunamadı.');
     stage('normalization', 'success', `${pieces.length} parça doğrulandı; metin loglanmadı`);
     const chunks = [];

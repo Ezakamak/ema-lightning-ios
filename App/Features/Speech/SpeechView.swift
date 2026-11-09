@@ -65,7 +65,7 @@ struct SpeechView: View {
                 Text("\(model.text.count) / 1.000").font(.caption.monospacedDigit()).foregroundStyle(model.text.count > 1000 ? Color.red : Color.secondary)
                 Spacer()
                 Menu {
-                    Button("Örnek metin", systemImage: "text.quote") { model.text = "Merhaba! Bugün güzel bir fikri sese dönüştürmek için harika bir gün." }
+                    Button("Örnek metin", systemImage: "text.quote") { model.text = SpeechViewModel.exampleText }
                     Button("Metni temizle", systemImage: "trash", role: .destructive) { confirmClear = true }
                 } label: { Image(systemName: "ellipsis.circle").font(.title3).foregroundStyle(.secondary) }
                     .disabled(model.isGenerating).accessibilityLabel("Metin seçenekleri")

@@ -5,6 +5,11 @@ on:
     branches: [main]
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      run_tests:
+        description: 'Run optional package, real ONNX and iOS UI tests (uses macOS minutes)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -22,6 +27,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Test domain package
+        if: github.event_name == 'workflow_dispatch' && inputs.run_tests
         run: swift test --package-path Packages/SpeechCore
       - name: Check repository contracts
         run: python3 scripts/check-repository.py
@@ -50,6 +56,7 @@ jobs:
           retention-days: 30
 
   test-ios:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_tests
     needs: build
     runs-on: macos-15-intel
     timeout-minutes: 25
@@ -79,7 +86,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
-    needs: [build, test-ios]
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -110,7 +117,7 @@ jobs:
             release-assets/build/*.ipa release-assets/build/SHA256SUMS release-assets/licenses.tar.gz
 
   preview:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    if: always() && !cancelled() && needs.build.result == 'success' && (needs.test-ios.result == 'success' || needs.test-ios.result == 'skipped') && (github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
     needs: [build, test-ios]
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -140,7 +147,7 @@ jobs:
               z.write(ipa,ipa.name)
               z.write('SHA256SUMS')
           PY
-          printf 'EMA Studio 0.3.0 (%s), unsigned preview.\n\nCI: %s\nSource: %s\n\nLocal history, offline MP3 and caption-video MP4 export, supplied logo, and opt-in developer diagnostics. Caption timing is estimated, not word-aligned. Full MP3 encoder source/licenses are inside the IPA. Requires your own signing. Physical-device/WhatsApp/Instagram sharing validation is still pending.\n' "$build_number" "$RUN_URL" "$SOURCE_SHA" > preview-notes.md
+          printf 'EMA Studio 0.3.0 (%s), unsigned preview.\n\nBuild workflow (optional tests may be skipped): %s\nSource: %s\n\nLocal history, offline MP3 and caption-video MP4 export, supplied logo, and opt-in developer diagnostics. Caption timing is estimated, not word-aligned. Full MP3 encoder source/licenses are inside the IPA. Requires your own signing. Physical-device/WhatsApp/Instagram sharing validation is still pending.\n' "$build_number" "$RUN_URL" "$SOURCE_SHA" > preview-notes.md
           gh release create "studio-preview-${GITHUB_RUN_ID}" --draft --target "$SOURCE_SHA" \
             --title "EMA Studio 0.3.0 (${build_number}) — preview" --notes-file preview-notes.md \
             EMA-Lightning-*.ipa EMA-Studio-*-portable.zip SHA256SUMS

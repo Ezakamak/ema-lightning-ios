@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — reading fixes
+
+- 158 editable pronunciation suggestions and persistent personal overrides in Settings.
+- Prose/list/Markdown punctuation preparation before the unchanged Turkish normalizer.
+- Original editor, history and MP4 text retained; no second voice or model download.
+- Removed the extra bottom recording-count bar; live WebKit host moved into Create tab icon.
+- New opening example text shared with the example action.
+- Broad tests are opt-in via workflow_dispatch; this follow-up is code-only, without CI/build.
+
 ## 0.3.0 — Studio preview
 
 - New Create, History and Settings UI, light/dark appearance, supplied logo/icon.

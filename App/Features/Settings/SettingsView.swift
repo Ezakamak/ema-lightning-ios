@@ -33,6 +33,11 @@ struct SettingsView: View {
                         Text("Apple önizlemesi").tag(EngineChoice.system)
                     }.disabled(model.isGenerating)
                 } header: { Text("Kişiselleştir") } footer: { Text("EMA sesi çevrimdışı çalışır ve otomatik kaydedilir. Apple sesi yalnızca alternatif önizlemedir.") }
+                Section("Okuma") {
+                    NavigationLink {
+                        PronunciationDictionaryView(store: model.pronunciations)
+                    } label: { Label("Telaffuz sözlüğü", systemImage: "text.book.closed") }
+                }
                 Section {
                     Toggle("Geliştirici Modu", isOn: $settings.developerMode).accessibilityIdentifier("developerModeToggle")
                     if settings.developerMode {

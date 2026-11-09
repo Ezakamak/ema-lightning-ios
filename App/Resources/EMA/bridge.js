@@ -40,7 +40,7 @@ window.synthesize = (text, requestID = crypto.randomUUID(), options = {}) => {
           clearTimeout(state.bootTimer);
           report({ stage: 'worker', status: 'success', detail: 'Worker modülü yürütüldü ve hazır mesajı alındı' });
           state.stage = 'runtime';
-          worker.postMessage({ text });
+          worker.postMessage({ text, pronunciations: options.pronunciations ?? [] });
         } else if (data.type === 'event') {
           if (data.status === 'running') state.stage = data.stage;
           report(data);

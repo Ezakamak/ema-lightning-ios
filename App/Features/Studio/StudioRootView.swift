@@ -15,7 +15,6 @@ struct StudioRootView: View {
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 0) {
                     ExportProgressView(exporter: exporter)
-                    dock
                     Divider().opacity(0.35)
                     HStack(spacing: 0) {
                         tabButton("Oluştur", symbol: "waveform.badge.plus", index: 0)
@@ -47,36 +46,17 @@ struct StudioRootView: View {
     private func tabButton(_ title: String, symbol: String, index: Int) -> some View {
         Button { tab = index } label: {
             VStack(spacing: 5) {
-                Image(systemName: symbol).font(.system(size: 20, weight: tab == index ? .semibold : .regular))
+                if index == 0 {
+                    // Persistent live WebKit host, integrated into the existing tab icon.
+                    // Keep it attached and visible across navigation; no extra status bar.
+                    InferenceViewport(engine: model.ema).frame(width: 32, height: 24)
+                        .saturation(tab == index ? 1 : 0).accessibilityHidden(true).allowsHitTesting(false)
+                } else {
+                    Image(systemName: symbol).font(.system(size: 20, weight: tab == index ? .semibold : .regular)).frame(height: 24)
+                }
                 Text(title).font(.system(size: 10, weight: .semibold))
-            }.frame(maxWidth: .infinity).frame(minHeight: 42).contentShape(Rectangle())
+            }.frame(maxWidth: .infinity).frame(minHeight: 44).contentShape(Rectangle())
         }.buttonStyle(.plain).foregroundStyle(tab == index ? StudioStyle.accent : Color.secondary)
             .accessibilityIdentifier("tab-\(index)").accessibilityAddTraits(tab == index ? [.isSelected] : [])
-    }
-    private var dock: some View {
-        HStack(spacing: 10) {
-            // This stays attached across tab/navigation changes. It is the actual EMA WebKit host.
-            InferenceViewport(engine: model.ema).frame(width: 80, height: 48).clipShape(RoundedRectangle(cornerRadius: 12)).accessibilityHidden(true)
-            DockStatus(model: model)
-            Spacer(minLength: 0)
-            if model.isGenerating {
-                Button(action: model.stop) { Image(systemName: "stop.circle.fill").font(.title).foregroundStyle(StudioStyle.accent) }
-                    .buttonStyle(.plain).accessibilityLabel("Ses oluşturmayı durdur").accessibilityIdentifier("dockStop")
-            }
-        }.padding(.horizontal, 20).padding(.vertical, 6)
-    }
-}
-
-@MainActor
-private struct DockStatus: View {
-    @ObservedObject var model: SpeechViewModel
-    @ObservedObject private var library: RecordingStore
-    init(model: SpeechViewModel) { self.model = model; library = model.library }
-    var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(model.isGenerating ? "Sesin hazırlanıyor…" : "EMA Lightning").font(.caption.weight(.semibold))
-            Text(model.isGenerating ? "Birazdan burada." : library.recordings.isEmpty ? "Bir fikirle başla." : "\(library.recordings.count) ses kaydı hazır.")
-                .font(.caption2).foregroundStyle(.secondary)
-        }
     }
 }

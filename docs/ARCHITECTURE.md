@@ -2,7 +2,7 @@
 
 Default inference path:
 
-SwiftUI → SpeechViewModel → SpeechRequest → EMASpeechEngine → WKWebView → module Web Worker → bundled normalizer + ONNX CPU/WASM → 48 kHz WAV → AVAudioPlayer.
+SwiftUI → SpeechViewModel → SpeechRequest → EMASpeechEngine → WKWebView → module Web Worker → prose preparation + pronunciation hints → bundled normalizer + ONNX CPU/WASM → 48 kHz WAV → AVAudioPlayer.
 
 Apple AVSpeechSynthesizer is a separate **explicitly selected alternative**, never an automatic fallback or a substitute for EMA test output.
 
@@ -30,3 +30,17 @@ Stop, engine changes and leaving the foreground cancel the worker and stop audio
 ## Remaining validation
 
 Physical iPhone airplane mode, cold launch after installation, audible quality, memory/thermal behavior and long-text cancellation must be checked on real hardware before a stable release. Browser and simulator inference cannot establish those device properties. See TESTING.md for recorded evidence and limitations.
+
+## Configurable reading
+
+PronunciationStore loads bundled EMA/pronunciations.json and local personal
+rules; Settings edits the same instance held by SpeechViewModel/EMASpeechEngine.
+A request snapshots its effective dictionary. Structured WKWebView arguments
+pass literal rules through the bridge to the worker; text-preparation.js applies
+prose formatting and longest whole-word hints before the unchanged normalizer.
+Personal text is not inserted into JavaScript source. History/captions keep the
+original request, and diagnostics omit the dictionary content.
+
+The persistent on-screen WebKit host is 32×24 inside the Create tab icon; the
+separate recording-count bar is removed. It stays in the window across tab
+changes, and host attachment/deadline validation remains active.

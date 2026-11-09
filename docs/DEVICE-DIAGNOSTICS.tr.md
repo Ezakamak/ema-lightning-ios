@@ -1,3 +1,7 @@
+> Güncel Studio arayüzünde ayrıntılar için Ayarlar → Geliştirici Modu'nu açın.
+> Ek kayıt-sayısı barı kaldırılmıştır; gerçek WebKit görünümü Oluştur sekmesinin
+> 32×24 simgesinde bağlı kalır. Bu takip değişikliği henüz cihazda doğrulanmadı.
+
 # Gerçek cihaz tanılama — 0.2.0
 
 Oku’ya dokunulduğunda asenkron motor başlamadan önce ekranda **✅ Oku butonuna basıldı** görünür. EMA Motor Durumu panelini açarak 20 aşamanın durumunu, gerçek olaylarla ölçülen sürelerini ve zaman damgalı logları izleyin. Panel kapalıyken de dokunma alındısı ve mevcut aşama görünür. Logları Kopyala veya Tanılama Raporunu Paylaş ile raporu aktarabilirsiniz.
