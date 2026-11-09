@@ -45,5 +45,9 @@ final class DiagnosticTraceTests: XCTestCase {
         XCTAssertFalse(result.contains("12345678-1234-1234-1234-123456789abc"))
         let auth = DiagnosticPrivacy.sanitize("Authorization: Bearer PRIVATE_AUTH", sensitive: [])
         XCTAssertFalse(auth.contains("PRIVATE_AUTH"))
+        let technical = "EMASpeechEngine.Failure: EMA_TEST_WORKER_ERROR"
+        XCTAssertEqual(DiagnosticPrivacy.sanitize(technical, sensitive: ["Merhaba! EMA Lightning artık kendi modelini kullanıyor."]), technical)
+        let once = DiagnosticPrivacy.sanitize("http://127.0.0.1:90/12345678-1234-1234-1234-123456789abc/worker.js?request=SECRET", sensitive: [])
+        XCTAssertEqual(DiagnosticPrivacy.sanitize(once, sensitive: []), once)
     }
 }

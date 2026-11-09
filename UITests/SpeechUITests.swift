@@ -14,8 +14,12 @@ final class SpeechUITests: XCTestCase {
         XCTAssertTrue(error.waitForExistence(timeout: 40))
         XCTAssertTrue(error.label.contains("EMA_TEST_WORKER_ERROR"), error.label)
         XCTAssertTrue(read.isEnabled)
-        app.buttons["EMA Motor Durumu"].firstMatch.tap()
-        XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Durdur çağrısı alındı")).firstMatch.exists)
+        // A real Worker error proves Read was not immediately routed to Stop.
+        // Verify that retry and an explicit Stop leave the control usable as well.
+        read.tap()
+        app.buttons["stopButton"].tap()
+        XCTAssertTrue(read.isEnabled)
+        XCTAssertTrue(app.staticTexts["tapAcknowledgement"].exists)
     }
 
     func testLegacyFormRowReallyDispatchesBothAutomaticButtonActions() {

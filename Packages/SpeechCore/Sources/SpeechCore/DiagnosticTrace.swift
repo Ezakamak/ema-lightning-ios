@@ -130,9 +130,11 @@ public enum DiagnosticPrivacy {
         var text = message
         // Whole input and its constituent words are private, including errors that echo a token.
         for value in sensitive where !value.isEmpty {
-            text = text.replacingOccurrences(of: value, with: "[metin gizlendi]", options: .caseInsensitive)
-            for token in value.split(whereSeparator: { $0.isWhitespace }) where token.count >= 2 {
-                text = text.replacingOccurrences(of: String(token), with: "[gizlendi]", options: .caseInsensitive)
+            let values = [value] + value.split(whereSeparator: { $0.isWhitespace }).filter { $0.count >= 2 }.map(String.init)
+            for item in values {
+                // Preserve technical identifiers such as EMA_TEST_WORKER_ERROR and EMASpeechEngine.
+                let pattern = #"(?i)(?<![\p{L}\p{N}_])"# + NSRegularExpression.escapedPattern(for: item) + #"(?![\p{L}\p{N}_])"#
+                text = text.replacingOccurrences(of: pattern, with: "[metin gizlendi]", options: .regularExpression)
             }
         }
         let patterns: [(String, String)] = [
@@ -140,7 +142,7 @@ public enum DiagnosticPrivacy {
             (#"(?i)(api[_-]?key|access[_-]?token|authorization|bearer|password)\s*[:= ]\s*[^\s,;]+"#, "$1=[gizlendi]"),
             (#"https?://127\.0\.0\.1(?::\d+)?/[0-9A-Fa-f-]{36}/"#, "http://127.0.0.1/[yerel]/"),
             (#"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"#, "[kimlik gizlendi]"),
-            (#"(https?://[^\s?]+)\?[^\s]*"#, "$1?[parametreler gizlendi]")
+            (#"(https?://[^\s?]+)\?[^\s]*"#, "$1#[parametreler_gizlendi]")
         ]
         for (pattern, replacement) in patterns {
             text = text.replacingOccurrences(of: pattern, with: replacement, options: .regularExpression)
