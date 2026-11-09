@@ -10,7 +10,8 @@ struct DiagnosticsPanel: View {
     var body: some View {
         Section {
             DisclosureGroup("EMA Motor Durumu", isExpanded: $expanded) {
-                TimelineView(.periodic(from: .now, by: 0.2)) { _ in
+                if expanded {
+                TimelineView(.periodic(from: .now, by: diagnostics.trace?.terminal == false ? 0.2 : 3600)) { _ in
                     VStack(alignment: .leading, spacing: 10) {
                         ForEach(Array(EMAStage.allCases.enumerated()), id: \.element) { index, stage in
                             let record = diagnostics.trace?.records[stage]
@@ -24,6 +25,7 @@ struct DiagnosticsPanel: View {
                             }.accessibilityIdentifier("stage-\(stage.rawValue)")
                         }
                     }
+                }
                 }
                 if let trace = diagnostics.trace {
                     Text("Son başarılı: \(trace.lastSuccess?.title ?? "Yok")\nİlk hata: \(trace.firstFailure?.title ?? "Yok")")
