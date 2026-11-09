@@ -2,6 +2,7 @@
 import SwiftUI
 import SpeechCore
 
+@MainActor
 struct DiagnosticsPanel: View {
     @ObservedObject var diagnostics: EMADiagnostics
     @State private var expanded = false

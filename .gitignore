@@ -7,3 +7,6 @@ xcuserdata/
 *.ipa
 *.xcarchive
 .env
+
+# The original logo is tracked; Actions generates the icon.
+App/Assets.xcassets/AppIcon.appiconset/AppIcon.png

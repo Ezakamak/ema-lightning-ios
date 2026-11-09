@@ -17,15 +17,17 @@ final class SpeechViewModel: ObservableObject {
     @Published private(set) var isGenerating = false
     let diagnostics: EMADiagnostics
     let ema: EMASpeechEngine
+    let library: RecordingStore
     private var system: SystemSpeechEngine?
     private var task: Task<Void, Never>?
     private var requestID: UUID?
     private let injectedAction: ((SpeechRequest, UUID) async throws -> Void)?
 
     init(fault: EMATestFault = .none, timing: EMATiming = EMATiming(),
-         action: ((SpeechRequest, UUID) async throws -> Void)? = nil) {
+         library: RecordingStore? = nil, action: ((SpeechRequest, UUID) async throws -> Void)? = nil) {
         let diagnostics = EMADiagnostics()
         self.diagnostics = diagnostics
+        self.library = library ?? RecordingStore()
         ema = EMASpeechEngine(diagnostics: diagnostics, timing: timing, fault: fault)
         injectedAction = action
     }
@@ -56,7 +58,13 @@ final class SpeechViewModel: ObservableObject {
             defer { if self.requestID == id { self.isGenerating = false; self.task = nil } }
             do {
                 if let action = self.injectedAction { try await action(request, id) }
-                else if selected == .ema { try await self.ema.speak(request, diagnosticID: id) }
+                else if selected == .ema {
+                    try await self.ema.speak(request, diagnosticID: id) { [weak self] speech in
+                        guard let self, self.requestID == id else { throw CancellationError() }
+                        _ = try await self.library.add(wav: speech.wav, text: request.text,
+                            duration: Double(speech.sampleCount) / Double(speech.sampleRate), engine: selected.rawValue)
+                    }
+                }
                 else {
                     self.diagnostics.note("Apple sistem sesi açıkça seçildi; EMA aşamaları çalıştırılmıyor.", id: id)
                     if self.system == nil { self.system = SystemSpeechEngine() }

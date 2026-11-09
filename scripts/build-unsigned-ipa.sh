@@ -1,11 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-version="${1:-0.2.0}"
+version="${1:-0.3.0}"
 if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  echo "Expected a version such as 0.2.0" >&2
+  echo "Expected a version such as 0.3.0" >&2
   exit 1
 fi
+scripts/prepare-assets.sh
 mkdir -p build
 xcodebuild -version
 xcodebuild -project EMALightning.xcodeproj -scheme EMALightning \

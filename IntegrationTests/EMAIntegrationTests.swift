@@ -40,10 +40,61 @@ final class EMAIntegrationTests: XCTestCase {
             attachment.name = "EMA-model-output.wav"
             attachment.lifetime = .keepAlways
             add(attachment)
+            if text == "Merhaba dünya." { try await verifyHistoryAndExports(speech, text: text) }
         }
         engine.stop()
         let recovered = try await engine.render(SpeechRequest(text: "Yeniden merhaba."))
         XCTAssertGreaterThan(recovered.sampleCount, 4800)
+    }
+
+    @MainActor
+    private func verifyHistoryAndExports(_ speech: RenderedSpeech, text: String) async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = RecordingStore(directory: directory)
+        let recording = try await store.add(wav: speech.wav, text: text,
+            duration: Double(speech.sampleCount) / Double(speech.sampleRate), engine: "EMA")
+        let source = store.url(for: recording)
+        XCTAssertEqual(try Data(contentsOf: source), speech.wav)
+        let restored = RecordingStore(directory: directory)
+        XCTAssertEqual(restored.recordings.first, recording)
+        try restored.rename(recording, title: "Türkçe test kaydı")
+        XCTAssertEqual(RecordingStore(directory: directory).recordings.first?.title, "Türkçe test kaydı")
+        let mp3 = directory.appendingPathComponent("ema.mp3")
+        let mp4 = directory.appendingPathComponent("ema.mp4")
+        let library = try XCTUnwrap(Bundle.main.url(forResource: "lame.all", withExtension: "js", subdirectory: "MP3"))
+        let logo = Bundle.main.url(forResource: "Logo-original", withExtension: "jpg", subdirectory: "Brand")
+        try await Task.detached {
+            try MP3Encoder.encode(source: source, destination: mp3, library: library)
+            try await CaptionVideoExporter.export(recording: recording, audioURL: source, destination: mp4, logoURL: logo) { _ in }
+        }.value
+        let mp3Audio = try AVAudioPlayer(contentsOf: mp3)
+        XCTAssertEqual(mp3Audio.duration, recording.duration, accuracy: 0.3)
+        let asset = AVURLAsset(url: mp4)
+        let video = try await asset.loadTracks(withMediaType: .video)
+        let audio = try await asset.loadTracks(withMediaType: .audio)
+        XCTAssertEqual(video.count, 1); XCTAssertEqual(audio.count, 1)
+        let size = try await XCTUnwrap(video.first).load(.naturalSize)
+        XCTAssertEqual(size, CGSize(width: 720, height: 1280))
+        let length = try await asset.load(.duration)
+        XCTAssertEqual(CMTimeGetSeconds(length), recording.duration, accuracy: 0.3)
+        let generator = AVAssetImageGenerator(asset: asset)
+        _ = try generator.copyCGImage(at: .zero, actualTime: nil)
+        for (url, type) in [(mp3, "public.mp3"), (mp4, "public.mpeg-4")] {
+            let attachment = XCTAttachment(data: try Data(contentsOf: url), uniformTypeIdentifier: type)
+            attachment.name = url.lastPathComponent; attachment.lifetime = .keepAlways; add(attachment)
+        }
+        // Cancellation cannot return a successful export or retain partial video frames.
+        let cancelled = Task.detached {
+            try Task.checkCancellation()
+            try await CaptionVideoExporter.export(recording: recording, audioURL: source, destination: directory.appendingPathComponent("cancel.mp4"), logoURL: logo) { _ in }
+        }
+        cancelled.cancel()
+        do { try await cancelled.value; XCTFail("Cancelled export must throw") } catch { XCTAssertTrue(error is CancellationError) }
+        try restored.remove(recording)
+        XCTAssertTrue(RecordingStore(directory: directory).recordings.isEmpty)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: source.path))
+
     }
 
     @MainActor

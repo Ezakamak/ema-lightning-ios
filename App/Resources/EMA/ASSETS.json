@@ -22,8 +22,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 300,
-      "sha256": "72fdbd6730534f3cf0e00b405c6171a9e5e88b365fd62aef8f48ae31343047b8"
+      "bytes": 356,
+      "sha256": "d0184358749b2edeb95cb4e4cdf13a6f070ccd8ef1796470eeaa3b080c259c6a"
     },
     {
       "path": "licenses/ema-lightning-LICENSE",
@@ -382,8 +382,8 @@
     },
     {
       "path": "viewport.css",
-      "bytes": 154,
-      "sha256": "bd5b58aa06914c2abf6ba1f794dd35cdecbdc15230ea0f48f82d034913a9fda7"
+      "bytes": 275,
+      "sha256": "d3b6e2603ece9acd45c69badac2501a7061de007c8d377d941a0c0308b5384da"
     },
     {
       "path": "worker.js",

@@ -30,7 +30,7 @@ jobs:
           REF_TYPE: ${{ github.ref_type }}
           REF_NAME: ${{ github.ref_name }}
         run: |
-          version=0.2.0
+          version=0.3.0
           if [[ "$REF_TYPE" == tag ]]; then version="${REF_NAME#v}"; fi
           scripts/build-unsigned-ipa.sh "$version"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -45,10 +45,12 @@ jobs:
             licenses/
             App/Resources/EMA/licenses/
             App/Resources/EMA/ASSETS.json
+            App/Resources/MP3/
           if-no-files-found: error
           retention-days: 30
 
   test-ios:
+    needs: build
     runs-on: macos-15-intel
     timeout-minutes: 25
     steps:
@@ -56,12 +58,23 @@ jobs:
         with:
           persist-credentials: false
       - name: Real bundled ONNX inference on iOS Simulator
-        run: scripts/test-ios-integration.sh
+        run: |
+          set -o pipefail
+          scripts/test-ios-integration.sh 2>&1 | tee build-test.log
+      - name: Extract screenshots and exported media evidence
+        if: always()
+        run: |
+          if [ -d build/EMAIntegration.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/EMAIntegration.xcresult --output-path build/test-attachments || true
+          fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: ios-integration-results
-          path: build/EMAIntegration.xcresult
+          path: |
+            build/EMAIntegration.xcresult
+            build/test-attachments/
+            build-test.log
           if-no-files-found: warn
 
   release:
@@ -85,7 +98,7 @@ jobs:
       - name: Verify download and prepare release notices
         run: |
           (cd release-assets/build && sha256sum --check SHA256SUMS)
-          tar -czf release-assets/licenses.tar.gz -C release-assets LICENSE NOTICE docs licenses App/Resources/EMA/licenses App/Resources/EMA/ASSETS.json
+          tar -czf release-assets/licenses.tar.gz -C release-assets LICENSE NOTICE docs licenses App/Resources/EMA/licenses App/Resources/EMA/ASSETS.json App/Resources/MP3
       - name: Create draft release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -95,3 +108,39 @@ jobs:
           gh release create "$TAG" --verify-tag --draft --title "EMA Lightning iOS $TAG" \
             --notes-file docs/RELEASE-NOTES.md \
             release-assets/build/*.ipa release-assets/build/SHA256SUMS release-assets/licenses.tar.gz
+
+  preview:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    needs: [build, test-ios]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: unsigned-ipa
+          path: incoming
+      - name: Prepare verified direct downloads and draft preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          (cd incoming/build && sha256sum --check SHA256SUMS)
+          build_number=$((100 + GITHUB_RUN_NUMBER))
+          cp incoming/build/*.ipa "EMA-Lightning-0.3.0-build${build_number}-unsigned.ipa"
+          sha256sum EMA-Lightning-*.ipa > SHA256SUMS
+          export EMA_PREVIEW_BUILD="$build_number"
+          python3 - <<'PY'
+          import os,zipfile,pathlib
+          ipa=next(pathlib.Path('.').glob('EMA-Lightning-*.ipa'))
+          with zipfile.ZipFile(f"EMA-Studio-build{os.environ['EMA_PREVIEW_BUILD']}-portable.zip",'w',compression=zipfile.ZIP_STORED,allowZip64=False) as z:
+              z.write(ipa,ipa.name)
+              z.write('SHA256SUMS')
+          PY
+          printf 'EMA Studio 0.3.0 (%s), unsigned preview.\n\nCI: %s\nSource: %s\n\nLocal history, offline MP3 and caption-video MP4 export, supplied logo, and opt-in developer diagnostics. Caption timing is estimated, not word-aligned. Full MP3 encoder source/licenses are inside the IPA. Requires your own signing. Physical-device/WhatsApp/Instagram sharing validation is still pending.\n' "$build_number" "$RUN_URL" "$SOURCE_SHA" > preview-notes.md
+          gh release create "studio-preview-${GITHUB_RUN_ID}" --draft --target "$SOURCE_SHA" \
+            --title "EMA Studio 0.3.0 (${build_number}) — preview" --notes-file preview-notes.md \
+            EMA-Lightning-*.ipa EMA-Studio-*-portable.zip SHA256SUMS

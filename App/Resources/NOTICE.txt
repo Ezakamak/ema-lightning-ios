@@ -21,3 +21,11 @@ normalizer dependency notices are bundled inside EMA/licenses/ in the app.
 The source repository retains these under App/Resources/EMA/licenses/ and
 licenses/upstream/. See docs/DEPENDENCIES.md and EMA/ASSETS.json for provenance.
 No endorsement by upstream authors is implied. Third-party terms remain intact.
+
+MP3 export additionally uses the separately loaded, unmodified lamejs 1.2.1
+JavaScript encoder by Alex Zhukov and LAME contributors (LGPL-3.0).
+https://github.com/zhuker/lamejs
+https://lame.sourceforge.io
+Its complete npm source archive, readable library, copyright notices, and
+GPL/LGPL license texts are bundled in MP3/. LGPL applies to that component;
+it does not replace the Apache-2.0 license of this application's own code.

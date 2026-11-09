@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — Studio preview
+
+- New Create, History and Settings UI, light/dark appearance, supplied logo/icon.
+- Persistent local WAV/text archive, search, replay/seek, rename and deletion.
+- Offline real MP3 encoding and portrait H.264/AAC MP4 with estimated phrase captions.
+- System share sheet, cancellation, export validation and partial-file cleanup.
+- Developer-only diagnostics by default; original real EMA engine retained.
+- Complete LGPL MP3 component source, notices and replacement instructions bundled.
+- Tests and icon/IPA/portable ZIP generation run in GitHub Actions.
+
 All notable changes will be recorded here. Versions follow MAJOR.MINOR.PATCH. Entries in Unreleased are not published releases.
 
 ## Unreleased

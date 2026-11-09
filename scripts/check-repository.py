@@ -50,3 +50,21 @@ assert 'http' not in (assets / 'bridge.js').read_text()
 assert 'http' not in (assets / 'worker.js').read_text()
 assert 'https://cdn' not in (assets / 'tts.js').read_text()
 print('Bundled model/runtime/license hashes verified.')
+
+# Studio encoder is a separately loaded LGPL component, with full source in the IPA.
+mp3 = root / 'App/Resources/MP3'
+mp3_manifest = json.loads((mp3 / 'ASSETS.json').read_text())
+assert mp3_manifest['license'] == 'LGPL-3.0'
+recorded = {entry['path'] for entry in mp3_manifest['files']}
+assert recorded == {p.name for p in mp3.iterdir() if p.is_file() and p.name != 'ASSETS.json'}
+for entry in mp3_manifest['files']:
+    data = (mp3 / entry['path']).read_bytes()
+    assert len(data) == entry['bytes'] and hashlib.sha256(data).hexdigest() == entry['sha256'], entry['path']
+for name in ['lame.all.js', 'lamejs-1.2.1-source.tgz', 'COPYING', 'COPYING.LESSER', 'REPLACEMENT.md']:
+    assert name in recorded, name
+import base64
+source = (mp3 / 'lamejs-1.2.1-source.tgz').read_bytes()
+assert 'sha512-' + base64.b64encode(hashlib.sha512(source).digest()).decode() == mp3_manifest['npm_integrity']
+assert (root / 'App/Resources/Brand/Logo-original.jpg').is_file()
+assert (root / 'App/Resources/PrivacyInfo.xcprivacy').is_file()
+print('Studio encoder source, licenses, integrity and brand/privacy resources verified.')

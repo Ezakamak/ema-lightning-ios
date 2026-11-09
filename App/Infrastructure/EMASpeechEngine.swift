@@ -95,7 +95,14 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
         webView.scrollView.isScrollEnabled = false
         webView.isUserInteractionEnabled = false
         webView.isInspectable = false
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
+        webView.loadHTMLString(Self.idleHTML, baseURL: nil)
     }
+    private static let idleHTML = """
+    <!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;background:transparent;height:100%;display:grid;place-items:center}div{display:flex;gap:4px;align-items:center}i{display:block;width:5px;background:#e41635;border-radius:3px;height:16px}i:nth-child(2),i:nth-child(4){height:28px}i:nth-child(3){height:38px}</style><div aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    """
 
     var hostReady: Bool {
         webView.window != nil && webView.superview != nil && !webView.isHidden &&
@@ -116,11 +123,15 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
     func speak(_ request: SpeechRequest, diagnosticID: UUID) async throws {
         _ = try await perform(request, diagnosticID: diagnosticID, shouldPlay: true)
     }
+    func speak(_ request: SpeechRequest, diagnosticID: UUID, onRendered: @escaping (RenderedSpeech) async throws -> Void) async throws {
+        _ = try await perform(request, diagnosticID: diagnosticID, shouldPlay: true, onRendered: onRendered)
+    }
     func render(_ request: SpeechRequest) async throws -> RenderedSpeech {
         try await perform(request, diagnosticID: nil, shouldPlay: false)
     }
 
-    private func perform(_ request: SpeechRequest, diagnosticID: UUID?, shouldPlay: Bool) async throws -> RenderedSpeech {
+    private func perform(_ request: SpeechRequest, diagnosticID: UUID?, shouldPlay: Bool,
+                         onRendered: ((RenderedSpeech) async throws -> Void)? = nil) async throws -> RenderedSpeech {
         guard active == nil else { throw Failure(message: "EMA isteği zaten çalışıyor; önce Durdur’a basın.") }
         let traceID = diagnosticID ?? diagnostics.begin(engine: displayName, input: request.text)
         diagnostics.protect(request.text)
@@ -181,6 +192,8 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
                 diagnostics.protect(normalized)
                 stage(.transfer, .success, op: op, detail: "\(wav.count) bayt WAV, \(count) örnek, 48 kHz doğrulandı")
                 let speech = RenderedSpeech(wav: wav, sampleCount: count, sampleRate: rate, rms: rms, normalizedText: normalized)
+                try await onRendered?(speech)
+                try ensureActive(op)
                 if shouldPlay { try await play(speech, op: op) }
                 return speech
             } catch {
@@ -283,7 +296,7 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
         webView.stopLoading()
         webView.evaluateJavaScript("window.cancelSynthesis?.('\(op.id.uuidString)')")
         // Navigation also tears down workers if WebKit cannot execute the cancellation script.
-        webView.loadHTMLString("<!doctype html><title>EMA durduruldu</title>", baseURL: nil)
+        webView.loadHTMLString(Self.idleHTML, baseURL: nil)
     }
     private func describe(_ error: Error) -> String {
         let ns = error as NSError

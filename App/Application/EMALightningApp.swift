@@ -43,8 +43,8 @@ struct EMALightningApp: App {
         }
     }
     private var screen: some View {
-        SpeechView(model: model).onChange(of: scenePhase) { _, phase in
-            if phase != .active { model.stop() }
+        StudioRootView(model: model).onChange(of: scenePhase) { _, phase in
+            if phase == .background { model.stop() }
         }
     }
 }

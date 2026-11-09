@@ -9,6 +9,16 @@ Independent, Apache-2.0 licensed iOS foundation, open to contributions.
 
 **Doğrulama sınırı / Validation limit:** Fiziksel iPhone uçak modu testi henüz yapılmadı. Bu sürüm cihazda doğrulanmış bitmiş ürün olarak sunulmaz. / Physical iPhone airplane-mode testing remains pending; this is not a device-verified finished release. See [test evidence and gaps](docs/TESTING.md).
 
+## Studio 0.3.0
+
+Oluştur · Geçmiş · Ayarlar; yerel kayıt arşivi, MP3 ve ilerleyen metinli MP4
+paylaşımı, varsayılan kapalı Geliştirici Modu. / Create, local history, MP3 and
+caption-video export, and opt-in developer diagnostics.
+
+[Studio kullanımı (TR)](docs/STUDIO.tr.md) · [Studio guide (EN)](docs/STUDIO.en.md)
+MP4 metin zamanlaması yaklaşıktır; kesin kelime hizalaması değildir.
+MP3 encoder: separate LGPL-3.0 lamejs; application code remains Apache-2.0.
+
 ## Kurulum / Installation
 
 - [Türkçe kurulum](docs/INSTALL.tr.md)
