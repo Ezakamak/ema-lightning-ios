@@ -37,3 +37,9 @@ No physical iPhone is attached. Real airplane-mode cold launch/playback, listeni
 3. Stop during model loading, synthesis and playback; start again. Switch to the explicitly labeled Apple alternative and back.
 4. Background/foreground the app, test missing/system voices, incoming audio interruptions and a 1,000-character text. Record device, iOS, peak memory, first-audio time and any termination.
 5. Attach results to the PR before publishing a stable release; retain unsuccessful cases as well.
+
+## Live diagnostics regression suite (0.2.0)
+
+Core tests exercise all 20 stage transitions, measured durations, cancellation, first-failure retention, stale request rejection and report redaction. Hosted integration tests retain actual ONNX synthesis and add synchronous ViewModel receipt/error recovery, an unattached WebView deadline, Worker script/constructor errors, absent ready handshake, unresolved promise and bridge timeout cases. UI tests tap the actual production Read control and reproduce the old automatic Form row in a DEBUG-only fixture. The fixture workers generate errors or no reply; they never generate substitute audio, and production does not select them.
+
+The final CI run and IPA link are recorded in the diagnostics PR. Physical iPhone 15 Pro Max / iOS 27 validation is pending. See [Turkish device diagnostics guide](DEVICE-DIAGNOSTICS.tr.md).

@@ -17,3 +17,11 @@ All notable changes will be recorded here. Versions follow MAJOR.MINOR.PATCH. En
 - Unsigned IPA CI for PRs/main/tags and draft GitHub Releases for successful version tags.
 - Turkish/English installation, contribution guidance, architecture, dependency audit and Issue templates.
 - Explicit credits to Canberk Aslan and Özcan Çelik; preserved upstream license/notice snapshots.
+
+### Device diagnostics (0.2.0, unreleased)
+
+- Synchronous Read receipt and independent Form button actions.
+- Persistent visible WebKit host, window attachment validation, separate page/bridge handshakes.
+- Twenty real-event stages, elapsed times, copy/share diagnostics and input/key/identifier redaction.
+- Explicit Swift continuation cancellation, per-stage timeouts, detailed Worker/JS/ORT/WebKit/HTTP errors and actual AVAudioPlayer completion.
+- Added state-machine, failure/recovery and UI regression tests. Physical iPhone/iOS 27 validation remains pending.

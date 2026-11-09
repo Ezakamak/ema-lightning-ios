@@ -3,6 +3,7 @@
 import { loadNormalizer } from "./normalizer.js";
 
 // Modified for EMA Lightning iOS: bundled CPU-only runtime/assets, no CDN/cache/download.
+// Further iOS modifications: real stage events and reuse of already-normalized pieces.
 // Original: ozcancelik/ema-lightning-web a9a688b19badc36486cdc2444ba957bc63ac860e (Apache-2.0).
 const ORT = new URL("./runtime/", import.meta.url).href;
 let ort = null;

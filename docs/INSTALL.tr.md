@@ -25,4 +25,7 @@ shasum -a 256 -c SHA256SUMS
 
 IPA imzasızdır: AirDrop veya Dosyalar üzerinden dokunarak yüklenemez. Kendi Apple hesabınız ve cihazınıza uygun provisioning ile güvenilir bir imzalama aracı kullanın veya yukarıdaki Xcode yöntemini tercih edin. Sertifikalarınızı ve parolalarınızı depoya/Issue’lara eklemeyin. Bu proje bir imzalama servisi sağlamaz.
 
-Yerelde imzasız IPA: `scripts/build-unsigned-ipa.sh 0.1.0`. Test: `swift test --package-path Packages/SpeechCore`. Xcode ve iOS SDK gerektiğinden IPA derlemesi Linux üzerinde çalışmaz.
+Yerelde imzasız IPA: `scripts/build-unsigned-ipa.sh 0.2.0`. Test: `swift test --package-path Packages/SpeechCore`. Xcode ve iOS SDK gerektiğinden IPA derlemesi Linux üzerinde çalışmaz.
+
+
+Live device diagnostics / Canlı cihaz tanılama: [guide](DEVICE-DIAGNOSTICS.tr.md).
