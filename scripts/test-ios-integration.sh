@@ -12,4 +12,6 @@ xcrun simctl bootstatus "$simulator" -b
 xcodebuild -project EMALightning.xcodeproj -scheme EMALightning \
   -configuration Debug -destination "platform=iOS Simulator,id=$simulator" \
   -resultBundlePath build/EMAIntegration.xcresult \
-  -parallel-testing-enabled NO IPHONEOS_DEPLOYMENT_TARGET=18.4 CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES test
+  -parallel-testing-enabled NO -test-timeouts-enabled YES \
+  -default-test-execution-time-allowance 120 -maximum-test-execution-time-allowance 180 \
+  IPHONEOS_DEPLOYMENT_TARGET=18.4 CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES test

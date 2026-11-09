@@ -1,6 +1,7 @@
 import XCTest
 
 final class SpeechUITests: XCTestCase {
+    override func setUpWithError() throws { continueAfterFailure = false }
     func testReadTapIsAcknowledgedWithoutInvokingStopAndWorkerErrorIsVisible() {
         let app = XCUIApplication()
         app.launchArguments = ["--ema-ui-worker-error"]
