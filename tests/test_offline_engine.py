@@ -60,6 +60,9 @@ try:
               catch(e) { return String(e.message); }
             }""", [file])
             assert expected.lower() in error.lower(), (file, error)
+        console_result = page.evaluate("() => window.synthesize('Merhaba dünya.', crypto.randomUUID(), {workerFile: 'test-fixtures/console-worker.js'})")
+        assert console_result['samples'] > 4800
+        assert page.evaluate("window.emaTestEvents.some(e => e.kind === 'log' && e.detail.includes('EMA_TEST_WORKER_CONSOLE_DETAIL'))")
         # Cancellation must reject the request and allow a fresh worker/session afterwards.
         assert page.evaluate('''async () => {
           const promise = window.synthesize('İptal edilecek uzun bir metin.').then(() => false, () => true);

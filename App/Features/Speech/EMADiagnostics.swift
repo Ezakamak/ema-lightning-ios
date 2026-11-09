@@ -57,7 +57,8 @@ final class EMADiagnostics: ObservableObject {
         var osBuild = [CChar](repeating: 0, count: max(1, length))
         sysctlbyname("kern.osversion", &osBuild, &length, nil, 0)
         let bundle = Bundle.main
-        var lines = ["EMA Lightning iOS — Tanılama raporu", "Cihaz modeli: \(UIDevice.current.model) / \(identifier)",
+        let modelName = identifier == "iPhone16,2" ? "iPhone 15 Pro Max" : UIDevice.current.model
+        var lines = ["EMA Lightning iOS — Tanılama raporu", "Cihaz modeli: \(modelName) / \(identifier)",
                      "iOS: \(UIDevice.current.systemVersion) / build \(String(cString: osBuild))",
                      "Uygulama: \(bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") ?? "?") (\(bundle.object(forInfoDictionaryKey: "CFBundleVersion") ?? "?"))"]
         guard let trace else { return lines.joined(separator: "\n") + "\nHenüz istek yok." }

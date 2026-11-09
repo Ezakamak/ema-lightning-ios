@@ -356,6 +356,11 @@
       "sha256": "d3d137ede5c548464c130eaadb2bf934ec0281bd08616845819bf3be0ec0461f"
     },
     {
+      "path": "test-fixtures/console-worker.js",
+      "bytes": 206,
+      "sha256": "43910acac8d86b523b4fc02187096db19a1b4c2beee173dd82e25e55dbe63e63"
+    },
+    {
       "path": "test-fixtures/stalled-worker.js",
       "bytes": 145,
       "sha256": "d1438532b53756d3a588d9bf205269fa98078afa96ea62034be42c50a4bcb624"
@@ -382,8 +387,8 @@
     },
     {
       "path": "worker.js",
-      "bytes": 2703,
-      "sha256": "3894941dcb12cc119b5d8e771aa8a91355ba962444a47b080e7cd109f0392c0d"
+      "bytes": 3053,
+      "sha256": "43edf35aba10db818af6d50fee8b4d1e95d640cb7c10d88aa1d244d02d7aa953"
     }
   ]
 }

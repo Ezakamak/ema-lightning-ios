@@ -136,6 +136,7 @@ public enum DiagnosticPrivacy {
             }
         }
         let patterns: [(String, String)] = [
+            (#"(?i)bearer\s+[^\s,;]+"#, "Bearer [gizlendi]"),
             (#"(?i)(api[_-]?key|access[_-]?token|authorization|bearer|password)\s*[:= ]\s*[^\s,;]+"#, "$1=[gizlendi]"),
             (#"https?://127\.0\.0\.1(?::\d+)?/[0-9A-Fa-f-]{36}/"#, "http://127.0.0.1/[yerel]/"),
             (#"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"#, "[kimlik gizlendi]"),

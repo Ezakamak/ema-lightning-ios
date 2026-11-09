@@ -43,5 +43,7 @@ final class DiagnosticTraceTests: XCTestCase {
         XCTAssertTrue(result.contains("WASM Error"))
         XCTAssertFalse(result.contains(input)); XCTAssertFalse(result.contains("SECRET"))
         XCTAssertFalse(result.contains("12345678-1234-1234-1234-123456789abc"))
+        let auth = DiagnosticPrivacy.sanitize("Authorization: Bearer PRIVATE_AUTH", sensitive: [])
+        XCTAssertFalse(auth.contains("PRIVATE_AUTH"))
     }
 }

@@ -2,6 +2,14 @@
 import { EMA, RATE, wavBlob } from './tts.js';
 const requestID = new URL(self.location.href).searchParams.get('request');
 let currentStage = 'worker';
+for (const level of ['warn', 'error']) {
+  const original = console[level].bind(console);
+  console[level] = (...args) => {
+    original(...args);
+    self.postMessage({ type: 'event', requestID, kind: 'log', stage: currentStage,
+      detail: `Worker console.${level}: ${args.filter(x => typeof x === 'string').join(' ').slice(0, 2000)}` });
+  };
+}
 const stage = (name, status, detail = '') => {
   if (status === 'running') currentStage = name;
   self.postMessage({ type: 'event', requestID, stage: name, status, detail });
