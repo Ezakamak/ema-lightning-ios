@@ -10,7 +10,14 @@ r = [r for r in json.load(sys.stdin)["runtimes"] if r.get("isAvailable") and r["
 if not r: sys.exit("An installed iOS 18.4+ runtime is required")
 print(max(r, key=lambda r: tuple(map(int, r["version"].split("."))))["identifier"])
 ')"
-simulator="$(xcrun simctl create EMA-AppStore-iPad com.apple.CoreSimulator.SimDeviceType.iPad-Pro-12-9-inch-6th-generation "$runtime")"
+device_type="$(xcrun simctl list devicetypes -j | python3 -c '
+import json, sys
+matches = [d for d in json.load(sys.stdin)["devicetypes"] if "iPad Pro" in d["name"] and "12.9" in d["name"] and "6th generation" in d["name"]]
+if not matches: sys.exit("No iPad Pro 12.9-inch 6th generation device type installed")
+print(sorted(matches, key=lambda d: ("8GB" not in d["name"], d["identifier"]))[0]["identifier"])
+')"
+echo "Using device type: $device_type; runtime: $runtime"
+simulator="$(xcrun simctl create EMA-AppStore-iPad "$device_type" "$runtime")"
 cleanup() {
   xcrun simctl shutdown "$simulator" >/dev/null 2>&1 || true
   xcrun simctl delete "$simulator" >/dev/null 2>&1 || true
