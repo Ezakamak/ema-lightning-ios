@@ -1,0 +1,37 @@
+{
+  "testedAt": "2026-11-10T08:41:26.078Z",
+  "url": "https://speak.ekatech.net/api/v1",
+  "version": 1,
+  "ruleCount": 158,
+  "checksum": "25c58ac2debbef6e9af15d3c5a895c8153f785070139897938e13ade0ef248b1",
+  "results": [
+    {
+      "name": "health 200",
+      "passed": true
+    },
+    {
+      "name": "dictionary 200 and verified bundled checksum",
+      "passed": true
+    },
+    {
+      "name": "version consistency",
+      "passed": true
+    },
+    {
+      "name": "304 and cache",
+      "passed": true
+    },
+    {
+      "name": "all writes 405",
+      "passed": true
+    },
+    {
+      "name": "404, payload 400, CORS 403",
+      "passed": true
+    },
+    {
+      "name": "root unchanged",
+      "passed": true
+    }
+  ]
+}

@@ -5,6 +5,8 @@ import SpeechCore
 @MainActor
 struct PronunciationDictionaryView: View {
     @ObservedObject var store: PronunciationStore
+    @ObservedObject private var sync: PronunciationSyncService
+    init(store: PronunciationStore) { self.store = store; self.sync = store.sync }
     @State private var selection = 0
     @State private var search = ""
     @State private var editor: DictionaryEditorItem?
@@ -15,6 +17,7 @@ struct PronunciationDictionaryView: View {
     }
     var body: some View {
         List {
+            PronunciationSyncSection(sync: store.sync)
             Section {
                 Toggle("Hazır telaffuz listesini kullan", isOn: $store.useBuiltIns)
                     .accessibilityIdentifier("useBuiltInPronunciations")
@@ -22,15 +25,15 @@ struct PronunciationDictionaryView: View {
             Section {
                 Picker("Sözlük", selection: $selection) {
                     Text("Kişisel (\(store.personal.count))").tag(0)
-                    Text("Hazır (\(store.builtIns.count))").tag(1)
+                    Text("Hazır (\(store.availableRules.count))").tag(1)
                 }.pickerStyle(.segmented)
             }
             if let loadError = store.loadError { Section { Text(loadError).foregroundStyle(.red) } }
             if selection == 0 {
                 personalSection
             } else {
-                ForEach(Array(Set(store.builtIns.map(\.category))).sorted(), id: \.self) { category in
-                    let entries = store.builtIns.filter { $0.category == category && matches($0) }.sorted { $0.word.localizedStandardCompare($1.word) == .orderedAscending }
+                ForEach(Array(Set(store.availableRules.map(\.category))).sorted(), id: \.self) { category in
+                    let entries = store.availableRules.filter { $0.category == category && matches($0) }.sorted { $0.word.localizedStandardCompare($1.word) == .orderedAscending }
                     if !entries.isEmpty {
                         Section(category) {
                             ForEach(entries) { rule in
@@ -141,6 +144,27 @@ private struct PronunciationEditor: View {
                         }.accessibilityIdentifier("savePronunciation")
                     }
                 }
+        }
+    }
+}
+
+@MainActor
+private struct PronunciationSyncSection: View {
+    @ObservedObject var sync: PronunciationSyncService
+    var body: some View {
+        Section("Merkezi Türkçe sözlük") {
+            LabeledContent("Sürüm", value: sync.dictionary.map { String($0.version) } ?? "Paketlenmiş sözlük")
+            if let dictionary = sync.dictionary {
+                LabeledContent("Merkezi kural", value: String(dictionary.ruleCount))
+                LabeledContent("Sözlük yayını", value: dictionary.updatedAt)
+            }
+            if let date = sync.lastSuccess { LabeledContent("Son başarılı kontrol") { Text(date, style: .date) } }
+            Text(sync.message).font(.footnote).foregroundStyle(.secondary)
+            Button { Task { await sync.check(force: true) } } label: {
+                HStack { Text("Güncellemeleri kontrol et"); if sync.checking { ProgressView() } }
+            }.disabled(sync.checking)
+            Text("Ses üretimi cihazınızda yapılır. Metinleriniz, sesleriniz ve kişisel sözlüğünüz gönderilmez. İnternet olmadan kayıtlı kurallar kullanılır.")
+                .font(.footnote).foregroundStyle(.secondary)
         }
     }
 }
