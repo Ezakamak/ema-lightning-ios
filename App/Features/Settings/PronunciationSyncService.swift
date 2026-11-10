@@ -71,7 +71,7 @@ final class PronunciationSyncService: ObservableObject {
             etag = defaults.string(forKey: "pronunciation.versionETag")
         } else {
             // Corrupt cache must trigger a fresh full download even after a recent successful check.
-            nextAttempt = .distantPast
+            if failures == 0 { nextAttempt = .distantPast }
         }
     }
 

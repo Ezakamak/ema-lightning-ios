@@ -138,6 +138,7 @@ final class PronunciationSyncTests: XCTestCase {
         _ = await (first, second)
         XCTAssertEqual(calls, 1)
         await service.check(); XCTAssertEqual(calls, 1)
+        await make(directory, defaults).check(); XCTAssertEqual(calls, 1)
         await service.check(force: true); XCTAssertEqual(calls, 2)
     }
 }
