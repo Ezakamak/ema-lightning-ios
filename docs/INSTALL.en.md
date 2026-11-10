@@ -8,7 +8,11 @@
 4. Select an iOS 17+ simulator and Run. For an iPhone, choose your own Team under Signing & Capabilities and use a unique Bundle Identifier if needed. Keep personal signing changes out of shared commits.
 5. Enable Developer Mode on your iPhone and complete Xcode's pairing and trust prompts. Apple's account and provisioning restrictions apply, including those for free accounts.
 
-The Read button uses **Apple's Turkish system voice**. EMA/ONNX inference is not integrated yet. If a Turkish voice is missing, download one in iOS Settings → Accessibility → speech/voice settings; labels vary by iOS version.
+The default engine uses the **real EMA Lightning ONNX model**. Models, Turkish normalizer and CPU/WASM runtime are embedded in the IPA, with no first-run download. Initial synthesis loads the models and plays after the whole utterance is ready. Input is limited to 1,000 characters. Apple's system voice is a separate engine choice and is never silently used on EMA failure.
+
+A physical iPhone airplane-mode test could not be performed here. After installation, enable airplane mode, disable Wi-Fi/Bluetooth, force-quit and cold launch the app, then synthesize with **EMA** selected. Report device/iOS and results in an Issue. See [test scope](TESTING.md).
+
+If the optional Apple alternative lacks a Turkish voice, download one in iOS Accessibility speech/voice settings; this is not needed for EMA.
 
 ## Unsigned IPA
 

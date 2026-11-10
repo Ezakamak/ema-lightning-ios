@@ -12,7 +12,7 @@ final class SpeechRequestTests: XCTestCase {
     }
 
     func testLengthBoundary() throws {
-        XCTAssertNoThrow(try SpeechRequest(text: String(repeating: "ş", count: 5_000)))
-        XCTAssertThrowsError(try SpeechRequest(text: String(repeating: "ş", count: 5_001)))
+        XCTAssertNoThrow(try SpeechRequest(text: String(repeating: "ş", count: 1_000)))
+        XCTAssertThrowsError(try SpeechRequest(text: String(repeating: "ş", count: 1_001)))
     }
 }

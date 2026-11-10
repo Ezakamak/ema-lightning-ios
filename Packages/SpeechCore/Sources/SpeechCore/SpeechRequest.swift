@@ -9,12 +9,12 @@ public struct SpeechRequest: Equatable, Sendable {
         public var errorDescription: String? {
             switch self {
             case .emptyText: return "Lütfen okunacak bir metin yazın."
-            case .textTooLong: return "Metin en fazla 5.000 karakter olabilir."
+            case .textTooLong: return "Metin en fazla 1.000 karakter olabilir."
             }
         }
     }
 
-    public static let maximumLength = 5_000
+    public static let maximumLength = 1_000
     public let text: String
 
     public init(text: String) throws {
@@ -29,6 +29,6 @@ public struct SpeechRequest: Equatable, Sendable {
 @MainActor
 public protocol SpeechEngine: AnyObject {
     var displayName: String { get }
-    func speak(_ request: SpeechRequest) throws
+    func speak(_ request: SpeechRequest) async throws
     func stop()
 }

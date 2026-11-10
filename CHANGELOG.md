@@ -4,6 +4,14 @@ All notable changes will be recorded here. Versions follow MAJOR.MINOR.PATCH. En
 
 ## Unreleased
 
+- Real EMA Lightning ONNX model is now the default engine; Apple system voice remains an explicit alternative.
+- Bundled FP32 text/sound/decoder graphs, Turkish normalizer WASM and ONNX Runtime Web 1.30.0; no CDN or first-use download.
+- Worker-based cancellable CPU inference, 48 kHz native WAV playback, 1,000-character input cap and model-error reporting without silent fallback.
+- Hosted iOS Simulator inference tests, offline browser tests, asset provenance hashes and IPA payload verification.
+- Physical iPhone airplane-mode and listening/performance validation remain pending.
+
+### Initial foundation
+
 - Independent Apache-2.0 iOS foundation with SwiftUI, injectable speech engine and tested text validation.
 - Apple Turkish system voice preview; native EMA/ONNX inference remains pending.
 - Unsigned IPA CI for PRs/main/tags and draft GitHub Releases for successful version tags.

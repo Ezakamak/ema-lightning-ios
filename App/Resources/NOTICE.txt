@@ -1,14 +1,23 @@
 EMA Lightning iOS
-Independent iOS implementation, distributed under Apache-2.0.
+Independent iOS application. New iOS source: Apache-2.0.
 
-Acknowledgments:
-- Canberk Aslan: original EMA Lightning model and Python project.
+This distribution includes works by others:
+- Canberk Aslan (canberkkkkkk): EMA Lightning model, Apache-2.0.
   https://github.com/canberk7/ema-lightning
-- Özcan Çelik: EMA Lightning ONNX/web adaptation.
-  https://github.com/ozcancelik/ema-lightning-web
+  https://huggingface.co/canberkkkkkk/ema-lightning
+- Özcan Çelik: EMA Lightning ONNX graphs, tts.js and normalizer.js,
+  Apache-2.0, from ozcancelik/ema-lightning-web at
+  a9a688b19badc36486cdc2444ba957bc63ac860e.
+  Modifications: tts.js uses bundled CPU-only runtime/assets without cache/CDN;
+  the iOS bridge executes its inference pipeline in a cancellable Web Worker.
+  Unmodified model graphs and normalizer WASM are bundled.
+- Erdem Tuna and contributors: normalizer-tr, Apache-2.0, compiled to WASM
+  by the web project from d0bc1bc6523faa4f6257642190bb723b7f4274a5.
+  Rust dependencies, Rust standard library and Unicode notices are retained.
+- Microsoft and contributors: ONNX Runtime Web 1.30.0, MIT.
 
-This initial native application does not bundle upstream code, model weights,
-ONNX Runtime, normalizer-tr, web assets, or fonts. The system voice preview uses
-Apple AVFoundation. Upstream license and notice snapshots are preserved under
-licenses/upstream for provenance; their presence does not imply those binaries
-are included. See docs/DEPENDENCIES.md for scope and integration requirements.
+Full upstream NOTICE, licenses, runtime third-party notices, model card and
+normalizer dependency notices are bundled inside EMA/licenses/ in the app.
+The source repository retains these under App/Resources/EMA/licenses/ and
+licenses/upstream/. See docs/DEPENDENCIES.md and EMA/ASSETS.json for provenance.
+No endorsement by upstream authors is implied. Third-party terms remain intact.

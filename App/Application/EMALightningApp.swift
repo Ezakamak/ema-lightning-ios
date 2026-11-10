@@ -4,7 +4,7 @@ import SwiftUI
 @main
 @MainActor
 struct EMALightningApp: App {
-    @StateObject private var model = SpeechViewModel(engine: SystemSpeechEngine())
+    @StateObject private var model = SpeechViewModel()
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {

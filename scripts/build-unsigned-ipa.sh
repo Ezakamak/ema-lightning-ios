@@ -28,3 +28,4 @@ rm -f "$output"
 (cd "$stage" && /usr/bin/zip -qry "$output" Payload)
 (cd build && shasum -a 256 "EMALightning-${version}-unsigned.ipa" > SHA256SUMS)
 unzip -t "$output"
+python3 scripts/verify-ipa.py "$output"

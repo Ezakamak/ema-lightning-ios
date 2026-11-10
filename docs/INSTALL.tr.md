@@ -8,7 +8,11 @@
 4. Simülatörde iOS 17+ bir cihaz seçip Run çalıştırın. Gerçek cihaz için Signing & Capabilities altında kendi Team’inizi seçin ve gerekirse benzersiz Bundle Identifier kullanın. Kişisel imzalama değişikliklerini ortak depoya göndermeyin.
 5. iPhone’da Geliştirici Modu’nu açın; Xcode’un istediği eşleştirme ve geliştirici güven adımlarını tamamlayın. Apple’ın ücretsiz hesap/provizyon kısıtlamaları geçerlidir.
 
-Uygulamadaki Oku düğmesi **Apple’ın Türkçe sistem sesini** kullanır. EMA/ONNX desteği henüz yoktur. Türkçe ses bulunamazsa iOS Ayarlar → Erişilebilirlik bölümündeki konuşma/ses ayarlarından Türkçe ses indirin. Bölüm adları iOS sürümüne göre değişebilir.
+Varsayılan motor **gerçek EMA Lightning ONNX** modelidir. Model, Türkçe normalizer ve CPU/WASM çalışma zamanı IPA’ya gömülüdür; ilk kullanımda internetten dosya indirilmez. İlk üretimde modeller yüklenir; sesin tamamı hazır olduğunda çalınır. Metin sınırı 1.000 karakterdir. Apple sistem sesi yalnızca motor seçicisindeki ayrı alternatiftir; EMA hatasında kendiliğinden devreye girmez.
+
+Fiziksel iPhone’da uçak modu testi bu ortamda yapılamadı. Kurulumdan sonra uçak modunu açıp Wi-Fi/Bluetooth’u kapatın, uygulamayı tamamen kapatıp yeniden başlatın ve **EMA** seçiliyken ses üretin. Sonuçları cihaz/iOS sürümüyle Issue’a yazın. [Test kapsamı](TESTING.md).
+
+Apple alternatifinde Türkçe ses bulunamazsa iOS erişilebilirlik konuşma/ses ayarlarından indirin; bu, EMA modeli için gerekli değildir.
 
 ## Unsigned IPA
 

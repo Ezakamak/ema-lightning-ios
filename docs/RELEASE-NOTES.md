@@ -1,9 +1,7 @@
-Native iOS foundation preview with Apple Turkish system speech.
-Yerel iOS başlangıç sürümü; önizleme Apple’ın Türkçe sistem sesini kullanır.
+EMA Lightning iOS: bundled real ONNX model, Turkish normalizer and CPU/WASM runtime. No model download or API key is needed. EMA is the default engine; Apple speech is an explicit alternative.
 
-EMA/ONNX inference is not integrated yet. EMA/ONNX çıkarımı henüz uygulanmadı.
+Gerçek EMA ONNX modeli, Türkçe normalizer ve CPU/WASM çalışma zamanı IPA içindedir. Varsayılan motor EMA’dır; Apple sesi ayrı alternatiftir.
 
-The IPA is unsigned and requires your own signing/provisioning before installation.
-IPA imzasızdır; kurulumdan önce kendi hesabınızla imzalamanız gerekir.
+Physical iPhone airplane-mode, listening quality and performance tests remain pending. This is not a device-verified finished release. See docs/TESTING.md and the Actions test results.
 
-See docs/INSTALL.tr.md, docs/INSTALL.en.md, CHANGELOG.md and docs/DEPENDENCIES.md in the tagged source. The license archive preserves the project license and upstream notices. Verify the IPA against SHA256SUMS.
+IPA is unsigned and requires your own signing/provisioning. Verify SHA256SUMS. Source installation: docs/INSTALL.tr.md and docs/INSTALL.en.md. Full dependency/license provenance: docs/DEPENDENCIES.md and the attached license archive.
