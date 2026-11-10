@@ -47,7 +47,7 @@ async function main() {
       : 'Team JWT rejected: Key ID/private key pairing, issuer, revocation or account state cannot be distinguished from HTTP 401 alone.');
   }
   if (apps.status !== 200 || profiles.status !== 200) { process.exitCode = 1; return; }
-  const bundle = 'net.ekatech.ema-lightning-ios';
+  const bundle = 'net.ekatech.ema-lightning-ios.627Y9N4Q6P';
   const app = await check('/v1/apps?filter[bundleId]=' + bundle + '&limit=1', jwt, 'Target app');
   const ids = await check('/v1/bundleIds?filter[identifier]=' + bundle + '&limit=1', jwt, 'Bundle ID');
   const certs = await check('/v1/certificates?filter[certificateType]=DISTRIBUTION&limit=1', jwt, 'Distribution certificates');

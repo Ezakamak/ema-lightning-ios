@@ -76,7 +76,7 @@ jobs:
             MARKETING_VERSION="$VERSION" \
             CURRENT_PROJECT_VERSION="$BUILD_NUMBER"
           test -d "$ARCHIVE_PATH/Products/Applications/EMALightning.app"
-          /usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleIdentifier' "$ARCHIVE_PATH/Info.plist" | grep -Fx 'net.ekatech.ema-lightning-ios'
+          /usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleIdentifier' "$ARCHIVE_PATH/Info.plist" | grep -Fx 'net.ekatech.ema-lightning-ios.627Y9N4Q6P'
 
       - name: Prepare App Store export options
         run: |
@@ -114,7 +114,7 @@ jobs:
           IPA_PATH="$(find "$EXPORT_PATH" -maxdepth 1 -name '*.ipa' -print -quit)"
           xcrun altool --upload-package "$IPA_PATH" --type ios \
             --apple-id "$ASC_APP_ID" \
-            --bundle-id net.ekatech.ema-lightning-ios \
+            --bundle-id net.ekatech.ema-lightning-ios.627Y9N4Q6P \
             --bundle-version "$BUILD_NUMBER" \
             --bundle-short-version-string "$VERSION" \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
