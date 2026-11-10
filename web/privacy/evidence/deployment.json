@@ -1,0 +1,93 @@
+{
+  "worker": {
+    "created_on": "2026-11-10T11:14:21.42942Z",
+    "modified_on": "2026-11-10T11:14:21.42942Z",
+    "id": "ema-lightning-privacy",
+    "tag": "7aee2b60fc56447cbd0c26d9fbbb8b90",
+    "entry_point": "worker.mjs",
+    "tags": null,
+    "deployment_id": "7c0ce22675184f6bb28cb8fbcd1545ed",
+    "tail_consumers": null,
+    "logpush": false,
+    "observability": {
+      "enabled": true,
+      "head_sampling_rate": 0.01,
+      "redact_query_string": true,
+      "logs": {
+        "enabled": true,
+        "head_sampling_rate": 0.01,
+        "persist": false,
+        "invocation_logs": false
+      },
+      "traces": {
+        "enabled": true,
+        "persist": false,
+        "head_sampling_rate": 0.01
+      }
+    },
+    "has_assets": false,
+    "has_modules": true,
+    "etag": "ddecd851718563dd76a83e768fa85c53df19a7c3e07b4d8edba9f7c51b436e2a",
+    "handlers": [
+      "fetch"
+    ],
+    "last_deployed_from": "api",
+    "compatibility_date": "2026-11-10",
+    "usage_model": "standard",
+    "startup_time_ms": 1
+  },
+  "routes": [
+    {
+      "id": "cb6e2cbf106a4ce08e9e5c01e0bce62d",
+      "pattern": "speak.ekatech.net/",
+      "script": "ema-lightning-privacy",
+      "request_limit_fail_open": false
+    },
+    {
+      "id": "661e9c0d44ca49ae86065c0061582c4f",
+      "pattern": "speak.ekatech.net/privacy*",
+      "script": "ema-lightning-privacy",
+      "request_limit_fail_open": false
+    },
+    {
+      "id": "4da5a613fbee4282ae0d7ae2d43be931",
+      "pattern": "speak.ekatech.net/en*",
+      "script": "ema-lightning-privacy",
+      "request_limit_fail_open": false
+    },
+    {
+      "id": "ea32c083621747bb82a97beb52ecfcce",
+      "pattern": "speak.ekatech.net/style.css",
+      "script": "ema-lightning-privacy",
+      "request_limit_fail_open": false
+    },
+    {
+      "id": "51909027776f4647b636a114b20c12a5",
+      "pattern": "speak.ekatech.net/preferences.js",
+      "script": "ema-lightning-privacy",
+      "request_limit_fail_open": false
+    },
+    {
+      "id": "5158aab528114594985bac021ce83076",
+      "pattern": "speak.ekatech.net/og.svg",
+      "script": "ema-lightning-privacy",
+      "request_limit_fail_open": false
+    },
+    {
+      "id": "823f97b1d79b448da49ce5934321d5b4",
+      "pattern": "speak.ekatech.net/robots.txt",
+      "script": "ema-lightning-privacy",
+      "request_limit_fail_open": false
+    },
+    {
+      "id": "b2beceb7b27043a1b5620839c46b56be",
+      "pattern": "speak.ekatech.net/sitemap.xml",
+      "script": "ema-lightning-privacy",
+      "request_limit_fail_open": false
+    }
+  ],
+  "commit": "3c7a762",
+  "ci": "https://github.com/Ezakamak/ema-lightning-ios/actions/runs/42805707864",
+  "existingApiRoutePreserved": "f4f3d49ba13247438460acc04856cdd8",
+  "dnsUnchanged": true
+}

@@ -1,0 +1,81 @@
+[
+  {
+    "url": "https://speak.ekatech.net/",
+    "success": true,
+    "bytes": 2937,
+    "sha256": "f843ac6d169373eb3abe64580def579b6eda7eb63fed3c712a804210b37c320e"
+  },
+  {
+    "url": "https://speak.ekatech.net/privacy",
+    "success": true,
+    "bytes": 12142,
+    "sha256": "3429bd73059273ae0c7220d63c93c8156de50d7c5c09787de7e276074fe93bfa"
+  },
+  {
+    "url": "https://speak.ekatech.net/en",
+    "success": true,
+    "bytes": 2889,
+    "sha256": "80b11ef858a2b75b873def9baac1d5541bb199dc6a1dcaa538c19d12001b6738"
+  },
+  {
+    "url": "https://speak.ekatech.net/en/privacy",
+    "success": true,
+    "bytes": 11348,
+    "sha256": "e6bbe2e4d0bb8ac415e103ab458d59fac36c2e90fbb8b24eef9fb6eb1c10e559"
+  },
+  {
+    "url": "https://speak.ekatech.net/style.css",
+    "success": true,
+    "bytes": 6400,
+    "sha256": "3320ffb9c9e7baff08849a22dd0b59617415a01461a0139437cbabe92a4cbe8a"
+  },
+  {
+    "url": "https://speak.ekatech.net/preferences.js",
+    "success": true,
+    "bytes": 552,
+    "sha256": "2ca1c4bd3a1ef7d98c529ff273f066089d697a9885b58251f8d9bdbb9b6e9632"
+  },
+  {
+    "url": "https://speak.ekatech.net/og.svg",
+    "success": true,
+    "bytes": 579,
+    "sha256": "555396815a85ee9a1193636117d1f6d212ceb616b78ddd920b43fdb15ae113d4"
+  },
+  {
+    "url": "https://speak.ekatech.net/robots.txt",
+    "success": true,
+    "bytes": 70,
+    "sha256": "2b53933392956125e7319af1ceb96b0a74f66bcd47d3176cb03c8b1ad837cbb9"
+  },
+  {
+    "url": "https://speak.ekatech.net/sitemap.xml",
+    "success": true,
+    "bytes": 318,
+    "sha256": "78839baefebde126c25e2d8606ce1bd9a494b5feaf2f6ba190ef61cbb7f5ca3e"
+  },
+  {
+    "url": "https://speak.ekatech.net/api/v1/health",
+    "success": true,
+    "bytes": 15,
+    "sha256": "a29ee2b15c494311c52521766e44af56a3ad2248e7a8ab465e5206463c13d288"
+  },
+  {
+    "url": "https://speak.ekatech.net/api/v1/pronunciations/version",
+    "success": true,
+    "bytes": 177,
+    "sha256": "7424b29a3c55c937cf0dd80b207c7984bba7bc02a113112c2d30c4eebb5298a0",
+    "unchanged": true
+  },
+  {
+    "url": "https://casino.ekatech.net/privacy",
+    "success": true,
+    "unchanged": false,
+    "unchanged_after_email_obfuscation_normalization": true
+  },
+  {
+    "url": "https://ekatech.net/",
+    "success": true,
+    "unchanged": false,
+    "note": "Root content changed concurrently; this task performed no root-domain, DNS or Pages mutations. Root remains accessible."
+  }
+]

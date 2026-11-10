@@ -56,6 +56,10 @@ struct SettingsView: View {
                 } header: { Text("Verilerin") } footer: {
                     Text("Metin ve ses geçmişi uygulamanın yerel alanında saklanır. Paylaş dediğinde seçtiğin platforma aktarılır. Uygulamayı kaldırmak kayıtlarını da siler.")
                 }
+                Section("Gizlilik ve destek") {
+                    Link("Gizlilik politikası", destination: URL(string: "https://speak.ekatech.net/privacy")!)
+                    Link("Destek", destination: URL(string: "mailto:contact@ekatech.net")!)
+                }
                 Section("Açık kaynak") {
                     NavigationLink("Lisanslar ve teşekkür") { LicensesView() }
                     Link("GitHub’da geliştir", destination: URL(string: "https://github.com/Ezakamak/ema-lightning-ios")!)
@@ -97,7 +101,7 @@ private struct LicensesView: View {
             }
             Section("Diğer bileşenler") {
                 Text("EMA modeli ve Türkçe normalizer: Apache-2.0. ONNX Runtime: MIT. Tam lisanslar, bildirimler ve kaynak sürümleri uygulama paketinde ve GitHub’daki bağımlılık dökümünde korunur.").font(.footnote)
-                Link("Bağımlılık lisans dökümü", destination: URL(string: "https://github.com/Ezakamak/ema-lightning-ios/blob/feat/studio-export-history/docs/DEPENDENCIES.md")!)
+                Link("Bağımlılık lisans dökümü", destination: URL(string: "https://github.com/Ezakamak/ema-lightning-ios/blob/main/docs/DEPENDENCIES.md")!)
             }
         }.navigationTitle("Lisanslar").navigationBarTitleDisplayMode(.inline)
     }

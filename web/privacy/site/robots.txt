@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://speak.ekatech.net/sitemap.xml

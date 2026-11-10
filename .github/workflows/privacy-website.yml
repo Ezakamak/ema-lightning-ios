@@ -1,0 +1,22 @@
+name: Privacy website checks
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ['web/privacy/**', '.github/workflows/privacy-website.yml']
+permissions:
+  contents: read
+jobs:
+  static-site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node web/privacy/scripts/build.mjs
+      - run: node --test web/privacy/tests/*.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: privacy-worker
+          path: web/privacy/dist/worker.mjs
+          if-no-files-found: error
