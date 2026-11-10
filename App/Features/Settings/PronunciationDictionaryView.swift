@@ -154,7 +154,10 @@ private struct PronunciationSyncSection: View {
     var body: some View {
         Section("Merkezi Türkçe sözlük") {
             LabeledContent("Sürüm", value: sync.dictionary.map { String($0.version) } ?? "Paketlenmiş sözlük")
-            if let dictionary = sync.dictionary { LabeledContent("Merkezi kural", value: String(dictionary.ruleCount)) }
+            if let dictionary = sync.dictionary {
+                LabeledContent("Merkezi kural", value: String(dictionary.ruleCount))
+                LabeledContent("Sözlük yayını", value: dictionary.updatedAt)
+            }
             if let date = sync.lastSuccess { LabeledContent("Son başarılı kontrol") { Text(date, style: .date) } }
             Text(sync.message).font(.footnote).foregroundStyle(.secondary)
             Button { Task { await sync.check(force: true) } } label: {

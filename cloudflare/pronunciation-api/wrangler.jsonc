@@ -1,7 +1,46 @@
 {
- "name":"ema-pronunciation-api","main":"src/index.js","compatibility_date":"2026-11-10",
- "account_id":"f675233e9a1e54a261896105ebb7f6c9","workers_dev":false,
- "d1_databases":[{"binding":"DB","database_name":"ema_pronunciations","database_id":"5c9f50f3-97c7-4a19-9791-7344bda006d3","migrations_dir":"migrations"}],
- "ratelimits":[{"name":"RATE_LIMITER","namespace_id":"1001","simple":{"limit":60,"period":60}}],
- "observability":{"enabled":true,"head_sampling_rate":0.01,"logs":{"enabled":true,"invocation_logs":false,"persist":false},"traces":{"enabled":true,"persist":false,"head_sampling_rate":0.01},"redact_query_string":true}
+  "name": "ema-pronunciation-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-10",
+  "account_id": "f675233e9a1e54a261896105ebb7f6c9",
+  "workers_dev": false,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ema_pronunciations",
+      "database_id": "5c9f50f3-97c7-4a19-9791-7344bda006d3",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": {
+        "limit": 60,
+        "period": 60
+      }
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.01,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": false,
+      "persist": false
+    },
+    "traces": {
+      "enabled": true,
+      "persist": false,
+      "head_sampling_rate": 0.01
+    },
+    "redact_query_string": true
+  },
+  "routes": [
+    {
+      "pattern": "speak.ekatech.net/api/v1/*",
+      "zone_id": "b9bd29cd8b2078d7d8a33c720ca13e0d"
+    }
+  ]
 }

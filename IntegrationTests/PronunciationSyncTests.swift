@@ -43,6 +43,11 @@ final class PronunciationSyncTests: XCTestCase {
             return (200, data, ["ETag": "\"test-\(snapshot.version)\""])
         }
     }
+    func testBundledChecksumMatchesPublishedSnapshot() throws {
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "pronunciations", withExtension: "json", subdirectory: "EMA"))
+        let rules = try JSONDecoder().decode([PronunciationRule].self, from: Data(contentsOf: url))
+        XCTAssertEqual(CentralDictionary.digest(rules), "25c58ac2debbef6e9af15d3c5a895c8153f785070139897938e13ade0ef248b1")
+    }
     func testFirstLaunchDownloadPersistenceSameVersionAndNewVersion() async throws {
         let (directory, defaults) = setup(), service = make(directory, defaults)
         XCTAssertNil(service.dictionary)

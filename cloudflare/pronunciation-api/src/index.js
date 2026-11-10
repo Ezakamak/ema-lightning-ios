@@ -24,7 +24,10 @@ export default {async fetch(request,env,ctx) {
    if(cache) ctx.waitUntil(cache.put(cacheKey,response.clone()));
   }
   const etag=response.headers.get('etag');
-  if((request.headers.get('if-none-match')||'').split(',').some(t=>t.trim()==='*'||t.trim().replace(/^W\//,'')===etag)) return new Response(null,{status:304,headers:response.headers});
-  return request.method==='HEAD'?new Response(null,{headers:response.headers}):response;
+  const clientHeaders=new Headers(response.headers);
+  clientHeaders.set('Cache-Control','no-cache');
+  clientHeaders.set('Cloudflare-CDN-Cache-Control','no-store');
+  if((request.headers.get('if-none-match')||'').split(',').some(t=>t.trim()==='*'||t.trim().replace(/^W\//,'')===etag)) return new Response(null,{status:304,headers:clientHeaders});
+  return new Response(request.method==='HEAD'?null:response.body,{headers:clientHeaders});
  } catch {return json({error:'dictionary_unavailable'},503,{'Retry-After':'300'});}
 }};
