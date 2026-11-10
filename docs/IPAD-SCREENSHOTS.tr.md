@@ -86,9 +86,15 @@ eklerken UI testindeki attachment adlarını ve Python `EXPECTED` listesini birl
 güncelle. App Store metadata klasörleri bu otomasyona girdi değildir.
 
 Uploader’ın kapsam/geri alma testleri `tests/test_ipad_screenshot_upload.py`
-dosyasında bulunur ve capture öncesi Actions job’unda çalışır. İlk macOS çalışması
-henüz yapılmadı; gerçek simulator başarısı ve Apple API yüklemesi ancak ilgili
-Actions çalışmasıyla doğrulanabilir.
+dosyasında bulunur ve capture öncesi Actions job’unda çalışır.
+
+10 Kasım 2026 doğrulaması: dört gerçek ekran iPad Pro 12.9-inch simülatöründe
+başarıyla yakalandı; XCTest 1 test / 0 hata ile tamamlandı. İlk yakalamanın son
+PNG işlemi kesildiği için korunmuş xcresult kurtarma yolu kullanıldı.
+[Kurtarma ve artifact çalışması](https://github.com/Ezakamak/ema-lightning-ios/actions/runs/42800806333)
+başarılıdır; dört dosyanın 2048×2732, 8-bit opak RGB PNG olduğu ayrıca doğrulandı.
+[PNG artifact’i](https://github.com/Ezakamak/ema-lightning-ios/actions/runs/42800806333/artifacts/13756466042)
+10 Aralık 2026’ya kadar saklanır. Apple API yüklemesi çalıştırılmadı.
 
 ## Yakalanmış test görsellerini kurtarma
 
