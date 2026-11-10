@@ -1,4 +1,4 @@
-name: Apple API credential check
+name: Update EMA support metadata
 on:
   workflow_dispatch:
     inputs:
@@ -18,11 +18,11 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - name: Read-only Apple API and provisioning preflight
+      - name: Update and verify existing App Store support URL
         env:
           VERIFY_BUILD_NUMBER: ${{ inputs.build_number }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: node scripts/check-apple-api.cjs
+        run: node scripts/update-asc-support-url.cjs
