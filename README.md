@@ -37,6 +37,11 @@ Successful `vMAJOR.MINOR.PATCH` tag builds prepare a **draft** [Release](https:/
 
 **Unsigned IPA doğrudan kurulmaz; önce kendi Apple kimliğinizle imzalanmalıdır. / An unsigned IPA must be signed with your own Apple identity before installation.** Building in GitHub Actions needs no signing certificate or Apple Developer secret.
 
+## iPad App Store ekran görüntüleri
+
+[Otomatik Türkçe iPad ekran görüntüleri ve isteğe bağlı API yüklemesi](docs/IPAD-SCREENSHOTS.tr.md).
+Actions artifact çıktısı; yeni IPA veya TestFlight gönderimi gerekmez.
+
 ## Kaynaklar ve teşekkür / Credits
 
 - **Canberk Aslan** — original [EMA Lightning](https://github.com/canberk7/ema-lightning) and [Turkish TTS model](https://huggingface.co/canberkkkkkk/ema-lightning).

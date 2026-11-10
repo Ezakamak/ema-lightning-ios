@@ -1,0 +1,89 @@
+name: iPad App Store screenshots
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: 'Türkçe iPad görsellerini App Store Connect’e yükle'
+        type: boolean
+        default: false
+      app_version:
+        description: 'Yükleme için mevcut, düzenlenebilir App Store sürümü (ör. 0.3.0)'
+        type: string
+        required: false
+      recovery_run_id:
+        description: 'İsteğe bağlı: yeniden derlemeden, önceki çalışmanın xcresult görsellerini kurtar'
+        type: string
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: ipad-app-store-screenshots
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - run: python3 -m unittest discover -s tests -p test_ipad_screenshot_upload.py
+  capture:
+    needs: validate
+    permissions:
+      contents: read
+      actions: read
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Capture Turkish iPad screens with Xcode UI Tests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RECOVERY_RUN_ID: ${{ inputs.recovery_run_id }}
+        run: bash scripts/capture-ipad-screenshots.sh
+      - name: Downloadable App Store PNGs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ipad-app-store-tr
+          path: build/ipad-screenshots/tr/*.png
+          if-no-files-found: error
+          retention-days: 30
+      - name: Preserve UI test evidence and logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ipad-screenshot-diagnostics
+          path: |
+            build/iPadScreenshots.xcresult
+            build/ipad-screenshots.log
+          if-no-files-found: warn
+          retention-days: 7
+  upload:
+    if: inputs.upload
+    needs: capture
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ipad-app-store-tr
+          path: build/ipad-screenshots/tr
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r scripts/screenshot-upload-requirements.txt
+      - name: Upload only Turkish iPad screenshots (no binary or metadata)
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+          ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
+          ASC_APP_VERSION: ${{ inputs.app_version }}
+        run: python scripts/upload-ipad-screenshots.py
