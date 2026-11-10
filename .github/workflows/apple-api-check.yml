@@ -1,70 +1,28 @@
 name: Apple API credential check
 on:
   workflow_dispatch:
-
+    inputs:
+      build_number:
+        description: Optional uploaded build number to inspect (read-only)
+        required: false
 permissions:
   contents: read
-
+concurrency:
+  group: apple-api-check
+  cancel-in-progress: false
 jobs:
   check-apple-api:
-    name: Validate App Store Connect JWT and provisioning access
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    env:
-      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-      ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
     steps:
-      - name: Read-only API diagnostic without exposing credentials
-        shell: bash
-        run: |
-          node <<'NODE'
-          const { createPrivateKey, sign } = require('node:crypto');
-
-          const keyId = process.env.ASC_KEY_ID || '';
-          const issuerId = process.env.ASC_ISSUER_ID || '';
-          const privateKey = process.env.ASC_PRIVATE_KEY || '';
-          if (!keyId || !issuerId || !privateKey) {
-            console.error('Missing one of ASC_KEY_ID, ASC_ISSUER_ID, ASC_PRIVATE_KEY.');
-            process.exit(1);
-          }
-          try {
-            createPrivateKey(privateKey);
-            console.log('Private key: valid PEM');
-          } catch {
-            console.error('Private key: invalid PEM; paste the complete .p8 text with original line breaks.');
-            process.exit(1);
-          }
-
-          const encoded = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
-          const now = Math.floor(Date.now() / 1000);
-          const head = encoded({ alg: 'ES256', kid: keyId, typ: 'JWT' });
-          const body = encoded({ iss: issuerId, iat: now - 30, exp: now + 300, aud: 'appstoreconnect-v1' });
-          const payload = head + '.' + body;
-          const signature = sign('sha256', Buffer.from(payload), { key: privateKey, dsaEncoding: 'ieee-p1363' }).toString('base64url');
-          const token = payload + '.' + signature;
-
-          async function check(path, description) {
-            try {
-              const response = await fetch('https://api.appstoreconnect.apple.com' + path, {
-                headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' },
-                signal: AbortSignal.timeout(15000)
-              });
-              console.log(description + ': HTTP ' + response.status);
-              return response.status;
-            } catch (error) {
-              console.error(description + ': network error (' + (error.name || 'unknown') + ')');
-              return 0;
-            }
-          }
-          (async () => {
-            const apps = await check('/v1/apps?limit=1', 'App Store Connect API');
-            const profiles = await check('/v1/profiles?limit=1', 'Provisioning API');
-            if (apps === 401 || profiles === 401) {
-              console.error('401: Check Team Keys (not Individual API Keys), matching Key ID / .p8 / Issuer ID, and key status.');
-            } else if (apps === 200 && profiles !== 200) {
-              console.error('App Store Connect JWT accepted, but provisioning access is missing or refused.');
-            }
-            if (apps !== 200 || profiles !== 200) process.exitCode = 1;
-          })();
-          NODE
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Read-only Apple API and provisioning preflight
+        env:
+          VERIFY_BUILD_NUMBER: ${{ inputs.build_number }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: node scripts/check-apple-api.cjs

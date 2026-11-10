@@ -50,3 +50,22 @@ assert 'http' not in (assets / 'bridge.js').read_text()
 assert 'http' not in (assets / 'worker.js').read_text()
 assert 'https://cdn' not in (assets / 'tts.js').read_text()
 print('Bundled model/runtime/license hashes verified.')
+
+# Fail before a macOS build if App Store delivery metadata regresses.
+import plistlib
+import struct
+info = plistlib.loads((root / 'App/Resources/Info.plist').read_bytes())
+assert set(info['UISupportedInterfaceOrientations']) == {
+    'UIInterfaceOrientationPortrait', 'UIInterfaceOrientationPortraitUpsideDown',
+    'UIInterfaceOrientationLandscapeLeft', 'UIInterfaceOrientationLandscapeRight',
+}, 'iPad multitasking requires all four orientations'
+icons = root / 'App/Resources/Assets.xcassets/AppIcon.appiconset'
+for entry in json.loads((icons / 'Contents.json').read_text())['images']:
+    png = (icons / entry['filename']).read_bytes()
+    assert png[:8] == b'\x89PNG\r\n\x1a\n', entry['filename']
+    width, height, depth, color_type = struct.unpack('>IIBB', png[16:26])
+    expected = int(float(entry['size'].split('x')[0]) * int(entry['scale'][0]))
+    assert (width, height) == (expected, expected), entry['filename']
+    assert depth == 8 and color_type == 2, 'App icons must be opaque RGB PNGs'
+assert 'ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;' in project
+print('App Store icon dimensions, opacity and orientation metadata verified.')

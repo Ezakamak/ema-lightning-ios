@@ -7,11 +7,15 @@ on:
         required: true
         default: '0.1.0'
       build_number:
-        description: Optional build number (defaults to workflow run number)
+        description: Optional build number (defaults to run number and attempt)
         required: false
 
 permissions:
   contents: read
+
+concurrency:
+  group: testflight-upload
+  cancel-in-progress: false
 
 jobs:
   upload:
@@ -23,17 +27,26 @@ jobs:
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
       VERSION: ${{ inputs.marketing_version }}
-      BUILD_NUMBER: ${{ inputs.build_number || github.run_number }}
+      BUILD_NUMBER: ${{ inputs.build_number || format('{0}.{1}', github.run_number, github.run_attempt) }}
       ARCHIVE_PATH: build/EMALightning.xcarchive
       EXPORT_PATH: build/app-store-export
+      ASC_KEY_DIRECTORY: /tmp/ema-asc-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate Apple API and provisioning before compiling
+        run: |
+          node scripts/check-apple-api.cjs
+          python3 scripts/check-repository.py
       - name: Select Xcode 26
         run: |
           set -euo pipefail
+          test -d /Applications/Xcode_26.5.app/Contents/Developer || { echo "::error::Xcode 26.5 is missing from the runner image"; exit 1; }
           sudo xcode-select -s /Applications/Xcode_26.5.app/Contents/Developer
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
+          xcrun altool --help
 
       - name: Validate version and existing Apple secrets
         run: |
@@ -45,11 +58,8 @@ jobs:
             fi
           done
           [[ "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]
-          [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] && (( BUILD_NUMBER > 0 ))
-          mkdir -p "$HOME/private_keys" build
-          chmod 700 "$HOME/private_keys"
-          printf '%s' "$ASC_PRIVATE_KEY" > "$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8"
-          chmod 600 "$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          [[ "$BUILD_NUMBER" =~ ^[1-9][0-9]{0,3}(\.[0-9]{1,2})?(\.[0-9]{1,2})?$ ]]
+          mkdir -p build
 
       - name: Archive signed EMA Lightning
         run: |
@@ -61,14 +71,14 @@ jobs:
             -destination 'generic/platform=iOS' \
             -archivePath "$ARCHIVE_PATH" \
             -allowProvisioningUpdates \
-            -authenticationKeyPath "$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
+            -authenticationKeyPath "$ASC_KEY_DIRECTORY/AuthKey_${ASC_KEY_ID}.p8" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             MARKETING_VERSION="$VERSION" \
             CURRENT_PROJECT_VERSION="$BUILD_NUMBER"
           test -d "$ARCHIVE_PATH/Products/Applications/EMALightning.app"
-          /usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleIdentifier' "$ARCHIVE_PATH/Info.plist" | grep -Fx 'net.ekatech.ema-lightning-ios'
+          /usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleIdentifier' "$ARCHIVE_PATH/Info.plist" | grep -Fx 'net.ekatech.ema-lightning-ios.627Y9N4Q6P'
 
       - name: Prepare App Store export options
         run: |
@@ -81,6 +91,7 @@ jobs:
           <key>teamID</key><string>${APPLE_TEAM_ID}</string>
           <key>destination</key><string>export</string>
           <key>uploadSymbols</key><true/>
+          <key>manageAppVersionAndBuildNumber</key><false/>
           </dict></plist>
           EOF
 
@@ -92,21 +103,37 @@ jobs:
             -exportPath "$EXPORT_PATH" \
             -exportOptionsPlist build/ExportOptions.plist \
             -allowProvisioningUpdates \
-            -authenticationKeyPath "$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
+            -authenticationKeyPath "$ASC_KEY_DIRECTORY/AuthKey_${ASC_KEY_ID}.p8" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID"
           find "$EXPORT_PATH" -maxdepth 1 -name '*.ipa' | grep -q .
+          echo 'Signed Release IPA export succeeded.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload to TestFlight
         run: |
           set -euo pipefail
+          export API_PRIVATE_KEYS_DIR="$ASC_KEY_DIRECTORY"
           IPA_PATH="$(find "$EXPORT_PATH" -maxdepth 1 -name '*.ipa' -print -quit)"
-          xcrun altool --upload-app --type ios --file "$IPA_PATH" \
+          xcrun altool --upload-package "$IPA_PATH" --type ios \
+            --apple-id "$ASC_APP_ID" \
+            --bundle-id net.ekatech.ema-lightning-ios.627Y9N4Q6P \
+            --bundle-version "$BUILD_NUMBER" \
+            --bundle-short-version-string "$VERSION" \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+          echo 'Apple upload command succeeded. TestFlight processing and tester availability must be checked separately.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve signed IPA for upload recovery
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: signed-testflight-ipa
+          path: build/app-store-export/*.ipa
+          if-no-files-found: ignore
+          retention-days: 1
 
       - name: Upload export logs for troubleshooting
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ema-testflight-export
           if-no-files-found: warn
@@ -114,3 +141,7 @@ jobs:
             build/ExportOptions.plist
             build/app-store-export/ExportOptions.plist
             build/EMALightning.xcarchive/Info.plist
+
+      - name: Remove API private key
+        if: always()
+        run: rm -rf "$ASC_KEY_DIRECTORY"
