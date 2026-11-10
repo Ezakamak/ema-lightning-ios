@@ -77,3 +77,29 @@ server-side collection. The manifest's empty list is evidence, not proof of comp
   app update; this task intentionally does not change the app.
 - Legal entity/address and jurisdiction-specific legal review were not supplied. The
   policy uses the existing EKATECH brand/contact and makes no invented legal guarantees.
+
+## Deployment and verification result
+
+Published 2026-11-10 as Worker `ema-lightning-privacy`, deployment
+`7c0ce22675184f6bb28cb8fbcd1545ed`, from website source commit `3c7a762`.
+PR: https://github.com/Ezakamak/ema-lightning-ios/pull/13 (open; not merged).
+CI: https://github.com/Ezakamak/ema-lightning-ios/actions/runs/42805707864
+— three web checks passed. The unrelated automatically triggered unsigned iOS
+build was cancelled; no iOS build was needed.
+
+Live GETs of `/`, `/privacy`, `/en`, `/en/privacy` and all local assets succeeded.
+Live HEAD `/privacy` returned 200, HTTP returned 308 to HTTPS. Live policy HTML
+matches the checked-in source byte-for-byte: all policy text, language links and
+contact email are available without JavaScript. No Set-Cookie was observed.
+The existing pronunciation API health check succeeded and version JSON was
+unchanged byte-for-byte. DNS record and original API route ID remain unchanged.
+Casino policy content is unchanged after normalizing Cloudflare's rotating email
+obfuscation tokens. The separate corporate root changed concurrently during the
+session; it remains accessible, and this task did not mutate its configuration.
+
+Browser QA was not performed: the managed Sites preview instructions require
+`cua_repl.js`, but no callable browser/REPL tool is exposed in this session. Per
+those instructions, no alternate browser-control path or browser installation
+was attempted. Responsive layout, TR/EN links and theme code were source-reviewed;
+actual Safari rendering, interactive theme selection and system-theme changes
+remain unverified. No claim of App Store approval is made.
