@@ -44,6 +44,7 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_26.5.app/Contents/Developer
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
+          xcrun altool --help
 
       - name: Validate version and existing Apple secrets
         run: |
@@ -111,9 +112,22 @@ jobs:
           set -euo pipefail
           export API_PRIVATE_KEYS_DIR="$ASC_KEY_DIRECTORY"
           IPA_PATH="$(find "$EXPORT_PATH" -maxdepth 1 -name '*.ipa' -print -quit)"
-          xcrun altool --upload-app --type ios --file "$IPA_PATH" \
+          xcrun altool --upload-package "$IPA_PATH" --type ios \
+            --apple-id "$ASC_APP_ID" \
+            --bundle-id net.ekatech.ema-lightning-ios \
+            --bundle-version "$BUILD_NUMBER" \
+            --bundle-short-version-string "$VERSION" \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
           echo 'Apple upload command succeeded. TestFlight processing and tester availability must be checked separately.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve signed IPA for upload recovery
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: signed-testflight-ipa
+          path: build/app-store-export/*.ipa
+          if-no-files-found: ignore
+          retention-days: 1
 
       - name: Upload export logs for troubleshooting
         if: always()

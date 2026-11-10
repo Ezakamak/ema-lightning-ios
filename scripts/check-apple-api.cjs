@@ -57,6 +57,8 @@ async function main() {
   console.log('Target app and Bundle ID exist. API read access does not prove cloud signing permission or local signing identity availability.');
   // Write only after every preflight check passes, for Xcode and altool.
   if (process.env.ASC_KEY_DIRECTORY) {
+    if (!/^[0-9]+$/.test(app.data.data[0].id)) throw new Error('Target Apple app ID is invalid.');
+    fs.appendFileSync(process.env.GITHUB_ENV, 'ASC_APP_ID=' + app.data.data[0].id + '\n');
     fs.mkdirSync(process.env.ASC_KEY_DIRECTORY, { recursive: true, mode: 0o700 });
     fs.writeFileSync(process.env.ASC_KEY_DIRECTORY + '/AuthKey_' + kid + '.p8', pem, { mode: 0o600 });
   }
