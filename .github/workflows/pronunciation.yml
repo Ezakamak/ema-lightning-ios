@@ -1,0 +1,37 @@
+name: Pronunciation dictionary checks
+on:
+  pull_request:
+  push:
+    branches: [feat/central-pronunciation-sync]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloudflare/pronunciation-api
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm test
+  swift:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: SpeechCore tests
+        run: swift test --package-path Packages/SpeechCore
+      - name: Sync integration tests (no ONNX or UI rerun)
+        run: |
+          device=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for a in d["devices"].values() for x in a if "iPhone" in x["name"]))')
+          xcodebuild test -project EMALightning.xcodeproj -scheme EMALightning -destination "platform=iOS Simulator,id=$device" -only-testing:EMAIntegrationTests/PronunciationSyncTests CODE_SIGNING_ALLOWED=NO -resultBundlePath build/Pronunciation.xcresult
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pronunciation-test-results
+          path: build/Pronunciation.xcresult

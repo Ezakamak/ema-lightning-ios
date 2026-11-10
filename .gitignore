@@ -7,3 +7,6 @@ xcuserdata/
 *.ipa
 *.xcarchive
 .env
+node_modules/
+.wrangler/
+cloudflare/pronunciation-api/seed.sql
