@@ -6,7 +6,7 @@
     </BuildActionEntry></BuildActionEntries>
   </BuildAction>
   <TestAction buildConfiguration="Debug" selectedDebuggerIdentifier="" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.PosixSpawn" shouldUseLaunchSchemeArgsEnv="YES">
-<Testables><TestableReference skipped="NO"><BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="000000000000000000000193" BuildableName="EMAIntegrationTests.xctest" BlueprintName="EMAIntegrationTests" ReferencedContainer="container:EMALightning.xcodeproj"/></TestableReference></Testables>
+<Testables><TestableReference skipped="NO"><BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="000000000000000000000193" BuildableName="EMAIntegrationTests.xctest" BlueprintName="EMAIntegrationTests" ReferencedContainer="container:EMALightning.xcodeproj"/></TestableReference><TestableReference skipped="NO"><BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="00000000000000000000025B" BuildableName="SpeechUITests.xctest" BlueprintName="SpeechUITests" ReferencedContainer="container:EMALightning.xcodeproj"/></TestableReference></Testables>
 </TestAction>
   <LaunchAction buildConfiguration="Debug" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="YES" allowLocationSimulation="YES">
     <BuildableProductRunnable runnableDebuggingMode="0"><BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="000000000000000000000004" BuildableName="EMALightning.app" BlueprintName="EMALightning" ReferencedContainer="container:EMALightning.xcodeproj"/></BuildableProductRunnable>

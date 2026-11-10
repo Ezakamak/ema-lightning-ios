@@ -1,8 +1,10 @@
 // EMA Lightning in the browser: text -> 48 kHz audio with onnxruntime-web (WebGPU, or WASM as fallback).
 // Mirrors ema_lightning's frontend.py, chunker.py and engine.py; export/verify.py checks the same math in Python.
 import { loadNormalizer } from "./normalizer.js";
+import { prepareForSpeech } from "./text-preparation.js";
 
 // Modified for EMA Lightning iOS: bundled CPU-only runtime/assets, no CDN/cache/download.
+// Further iOS modifications: real stage events, prepared pieces and configurable prose/pronunciation hints.
 // Original: ozcancelik/ema-lightning-web a9a688b19badc36486cdc2444ba957bc63ac860e (Apache-2.0).
 const ORT = new URL("./runtime/", import.meta.url).href;
 let ort = null;
@@ -41,8 +43,8 @@ function blocks(text) {
   return out;
 }
 
-export function frontend(text, vocab, normalize) {
-  text = text.replace(UNSAFE, " ");
+export function frontend(text, vocab, normalize, pronunciations = []) {
+  text = prepareForSpeech(text, pronunciations).replace(UNSAFE, " ");
   if (!text.trim()) return "";
   return alphabet(blocks(text).map(normalize).join(" "), vocab);
 }
@@ -176,6 +178,7 @@ export class EMA {
   // precision "fp16" loads the half-size sound graph from models/fp16/ (fp32 at its edges). Text and decoder stay
   // fp32: on WebGPU their fp16 versions go wrong (see export/to_fp16.py).
   static async load(backend = "wasm", base = new URL("./models/", import.meta.url).href, onProgress = () => {}, precision = "fp32") {
+    onProgress("runtime", "running", "Yerel ORT modülü ve CPU/WASM başlatılıyor");
     ort = await import(ORT + "ort.wasm.min.mjs");
     ort.env.wasm.numThreads = 1;
     ort.env.wasm.proxy = false;
@@ -184,13 +187,16 @@ export class EMA {
     const opts = { executionProviders: ["wasm"],
                    graphOptimizationLevel: "all" };
     const sessions = {};
-    onProgress("normalizer", 0);
+    onProgress("normalizer", "running");
     const normalize = await loadNormalizer(await bytes(base + "normalizer.wasm"));
+    onProgress("normalizer", "success", "Normalizer WASM instantiate edildi");
     const names = ["text", "sound", "decoder"];
     for (const [i, name] of names.entries()) {
-      onProgress(name, (i + 1) / (names.length + 1));
+      onProgress(name + "Model", "running");
       const buf = await bytes(base + (precision === "fp16" && name === "sound" ? "fp16/" : "") + name + ".onnx");
       sessions[name] = await ort.InferenceSession.create(buf, opts);
+      if (name === "text") onProgress("runtime", "success", "İlk CPU/WASM ORT oturumu oluşturuldu; WASM hazır olduğu doğrulandı");
+      onProgress(name + "Model", "success", "Model baytları okundu ve ORT oturumu oluşturuldu");
     }
     const ema = new EMA(meta, sessions, backend, normalize);
     ema.precision = precision;
@@ -212,15 +218,15 @@ export class EMA {
     for (const s of [this.text, this.sound, this.decoder]) await s?.release().catch(() => {});
   }
 
-  pieces(text, speed) {
-    return chunk(frontend(text, this.alpha, this.normalize), speed);
+  pieces(text, speed, pronunciations = []) {
+    return chunk(frontend(text, this.alpha, this.normalize, pronunciations), speed);
   }
 
   // Yields Float32Array chunks of 48 kHz audio as they are made; `stats` gets per-stage timings.
   // onPiece({ text, words, starts, seconds }) runs before a piece's audio: each spoken word and when it
   // starts, in seconds from the piece's first sample, read off the model's own frame timeline.
-  async *stream(text, { speed = 1, seed = 0, stats = {}, onPiece = () => {} } = {}) {
-    const pieces = this.pieces(text, speed);
+  async *stream(text, { speed = 1, seed = 0, stats = {}, onPiece = () => {}, preparedPieces = null, pronunciations = [] } = {}) {
+    const pieces = preparedPieces ?? this.pieces(text, speed, pronunciations);
     stats.pieces = pieces.map(([p]) => p);
     stats.text = stats.sound = stats.decode = 0;
     const nSteps = this.meta.times.length, D = this.meta.latent_dim, hop = this.meta.hop;

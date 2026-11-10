@@ -17,13 +17,13 @@
   "files": [
     {
       "path": "bridge.js",
-      "bytes": 973,
-      "sha256": "a8ecebbc7eb067e1f4e75d10d7e7cb29ff387bd9ebc71a64b8f816b55e79ef54"
+      "bytes": 3636,
+      "sha256": "34608c103f1524906eace3541d8927eb89b68fe6d3afebf437b0d4da69e4c7a5"
     },
     {
       "path": "index.html",
-      "bytes": 162,
-      "sha256": "2373d1489e8cb515c547e63a211e8591c3be7c240d59859e7a2cd8c98e70eda6"
+      "bytes": 356,
+      "sha256": "d0184358749b2edeb95cb4e4cdf13a6f070ccd8ef1796470eeaa3b080c259c6a"
     },
     {
       "path": "licenses/ema-lightning-LICENSE",
@@ -336,6 +336,11 @@
       "sha256": "24bcddacb45ab2f21d51187f0539074eee47499e67908f2ece41d827dce9b3d9"
     },
     {
+      "path": "pronunciations.json",
+      "bytes": 16522,
+      "sha256": "4837d95ac3f73bf0006e9395204c5fdd01a8557dfff7c551c18e800196073609"
+    },
+    {
       "path": "runtime/ort-wasm-simd-threaded.mjs",
       "bytes": 24381,
       "sha256": "e13f7f94fc51b4ca72b12faeb1ee95f4ace6dfbc8939bc718aabdc0a27c4299b"
@@ -351,14 +356,49 @@
       "sha256": "219e6a1fc8a9938268d18efca3c91d310bd2f4a59bbd13744df5b2b7fc6cee3b"
     },
     {
+      "path": "telemetry.js",
+      "bytes": 1373,
+      "sha256": "d3d137ede5c548464c130eaadb2bf934ec0281bd08616845819bf3be0ec0461f"
+    },
+    {
+      "path": "test-fixtures/console-worker.js",
+      "bytes": 206,
+      "sha256": "43910acac8d86b523b4fc02187096db19a1b4c2beee173dd82e25e55dbe63e63"
+    },
+    {
+      "path": "test-fixtures/stalled-worker.js",
+      "bytes": 145,
+      "sha256": "d1438532b53756d3a588d9bf205269fa98078afa96ea62034be42c50a4bcb624"
+    },
+    {
+      "path": "test-fixtures/throw-worker.js",
+      "bytes": 120,
+      "sha256": "8d76b388ce56bbc81e5c2da991b4f78ea53b43a654960206dc2fd7cf1040c1c9"
+    },
+    {
+      "path": "test-fixtures/unresolved-worker.js",
+      "bytes": 266,
+      "sha256": "8a3211b615052476665cbe345bce918de6e9912d19304596d12446dca1ed0459"
+    },
+    {
+      "path": "text-preparation.js",
+      "bytes": 6332,
+      "sha256": "e7751427d5c14e912e303b30b8b5d3522d651a064613288c6b7d82006abb1014"
+    },
+    {
       "path": "tts.js",
-      "bytes": 11878,
-      "sha256": "77ac22269e7a2700b018f9d411fdfe61ab82bd81c665eccb3b4ce30d0003546e"
+      "bytes": 12617,
+      "sha256": "ecf15b973426989082e2ad8e427d4dc8967cd3bc235c80e51d2792ebe451e9c3"
+    },
+    {
+      "path": "viewport.css",
+      "bytes": 274,
+      "sha256": "632b8fadcfdf7cd42bad3bda937debfea284716695f2b5686101de5911084c37"
     },
     {
       "path": "worker.js",
-      "bytes": 1598,
-      "sha256": "7bbddcda9174f71b40612c55554ba0513ad35c5a345f4ebcec1a6bd44e53480c"
+      "bytes": 3080,
+      "sha256": "0bc8ef8d0d019f17f559ffb8f4f6aa06e5fdbf25c6725e11747ea20be6b92165"
     }
   ]
 }

@@ -25,4 +25,7 @@ shasum -a 256 -c SHA256SUMS
 
 The IPA is unsigned and cannot be installed by tapping it in Files or AirDrop. Sign it with your own Apple identity and suitable device provisioning using a trusted tool, or build through Xcode above. Do not upload passwords, signing certificates or provisioning profiles to the repository or issues. This project does not supply a signing service.
 
-Local unsigned build: `scripts/build-unsigned-ipa.sh 0.1.0`. Domain tests: `swift test --package-path Packages/SpeechCore`. IPA builds require macOS, Xcode and an iOS SDK; they do not run on Linux.
+Local unsigned build: `scripts/build-unsigned-ipa.sh 0.2.0`. Domain tests: `swift test --package-path Packages/SpeechCore`. IPA builds require macOS, Xcode and an iOS SDK; they do not run on Linux.
+
+
+Live device diagnostics / Canlı cihaz tanılama: [guide](DEVICE-DIAGNOSTICS.tr.md).

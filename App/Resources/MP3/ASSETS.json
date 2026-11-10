@@ -1,0 +1,46 @@
+{
+  "package": "lamejs",
+  "version": "1.2.1",
+  "license": "LGPL-3.0",
+  "repository": "git+https://github.com/zhuker/lamejs.git",
+  "npm_integrity": "sha512-s7bxvjvYthw6oPLCm5pFxvA84wUROODB8jEO2+CE1adhKgrIvVOlmMgY8zyugxGrvRaDHNJanOiS21/emty6dQ==",
+  "tarball": "https://registry.npmjs.org/lamejs/-/lamejs-1.2.1.tgz",
+  "modifications": "None. Separate unminified script loaded by JavaScriptCore. Complete npm source archive included.",
+  "files": [
+    {
+      "path": "COPYING",
+      "bytes": 35149,
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    },
+    {
+      "path": "COPYING.LESSER",
+      "bytes": 7652,
+      "sha256": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118"
+    },
+    {
+      "path": "REPLACEMENT.md",
+      "bytes": 1378,
+      "sha256": "3e0648d86e90f5d9fe67ec1ac3525d77440aec385f903c4942c583eeb71ff29c"
+    },
+    {
+      "path": "UPSTREAM-LICENSE.txt",
+      "bytes": 424,
+      "sha256": "cd144ca132e3842b01f5ed2d6f3a32141e24a1cc15e115aa5f19a2294ce0a379"
+    },
+    {
+      "path": "UPSTREAM-README.md",
+      "bytes": 3259,
+      "sha256": "e798f17c0359bb14330b92f0c4a775e2c12b01887598da092a406dc130834826"
+    },
+    {
+      "path": "lame.all.js",
+      "bytes": 530087,
+      "sha256": "026bd88846040f357a937cd85821a48492a362eff0812cda734f23fca55fea3b"
+    },
+    {
+      "path": "lamejs-1.2.1-source.tgz",
+      "bytes": 3071027,
+      "sha256": "d8d099ef788808c15bc9b4a407dd23ae935feb1152e6bb0efdcd24e3e91c2a2d"
+    }
+  ]
+}

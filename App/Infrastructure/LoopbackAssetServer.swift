@@ -4,14 +4,23 @@ import Network
 
 /// Serves only the bundled EMA directory, bound to IPv4 loopback on an ephemeral port.
 /// HTTP provides WebKit with standard ES module/WASM semantics without a remote server.
+struct AssetServerEvent: Sendable {
+    let summary: String
+    let failed: Bool
+}
+
 final class LoopbackAssetServer {
+    private let onEvent: @Sendable (AssetServerEvent) -> Void
+    private var startTimeout: DispatchWorkItem?
     private let root: URL
     private let token = UUID().uuidString
     private let queue = DispatchQueue(label: "net.ekatech.ema.assets")
     private var listener: NWListener?
     private var connections: [UUID: NWConnection] = [:]
 
-    init(root: URL) { self.root = root.standardizedFileURL }
+    init(root: URL, onEvent: @escaping @Sendable (AssetServerEvent) -> Void = { _ in }) {
+        self.root = root.standardizedFileURL; self.onEvent = onEvent
+    }
 
     func start() async throws -> URL {
         let parameters = NWParameters.tcp
@@ -20,22 +29,34 @@ final class LoopbackAssetServer {
         self.listener = listener
         return try await withCheckedThrowingContinuation { continuation in
             var resumed = false
+            var timedOut = false
             listener.stateUpdateHandler = { [weak self] state in
                 guard !resumed else { return }
                 switch state {
                 case .ready:
-                    guard let self, let port = listener.port else { return }
+                    guard let self, let port = listener.port else {
+                        resumed = true
+                        continuation.resume(throwing: NWError.posix(.EINVAL))
+                        return
+                    }
+                    self.startTimeout?.cancel()
                     resumed = true
+                    listener.stateUpdateHandler = nil
                     continuation.resume(returning: URL(string: "http://127.0.0.1:\(port.rawValue)/\(self.token)/index.html")!)
                 case .failed(let error):
                     resumed = true
+                    listener.stateUpdateHandler = nil
                     continuation.resume(throwing: error)
                 case .cancelled:
                     resumed = true
-                    continuation.resume(throwing: CancellationError())
+                    listener.stateUpdateHandler = nil
+                    continuation.resume(throwing: timedOut ? NWError.posix(.ETIMEDOUT) : CancellationError())
                 default: break
                 }
             }
+            let deadline = DispatchWorkItem { timedOut = true; listener.cancel() }
+            startTimeout = deadline
+            queue.asyncAfter(deadline: .now() + 15, execute: deadline)
             listener.newConnectionHandler = { [weak self] connection in
                 guard let self else { connection.cancel(); return }
                 let id = UUID()
@@ -75,16 +96,18 @@ final class LoopbackAssetServer {
         let file = root.appendingPathComponent(relative).standardizedFileURL
         guard file.path.hasPrefix(root.path + "/"),
               let body = try? Data(contentsOf: file, options: .mappedIfSafe) else {
+            onEvent(AssetServerEvent(summary: "404 \(file.lastPathComponent)", failed: true))
             send(connection, status: "404 Not Found", type: "text/plain", body: Data())
             return
         }
         let types = ["html": "text/html", "js": "text/javascript", "mjs": "text/javascript",
-                     "json": "application/json", "wasm": "application/wasm"]
+                     "json": "application/json", "wasm": "application/wasm", "css": "text/css"]
+        onEvent(AssetServerEvent(summary: "200 \(file.lastPathComponent) (\(body.count) bayt)", failed: false))
         send(connection, status: "200 OK", type: types[file.pathExtension] ?? "application/octet-stream", body: body)
     }
 
     private func send(_ connection: NWConnection, status: String, type: String, body: Data) {
-        let policy = "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'"
+        let policy = "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; worker-src 'self'; connect-src 'self'"
         let headers = "HTTP/1.1 \(status)\r\nContent-Type: \(type)\r\nContent-Length: \(body.count)\r\nConnection: close\r\nCache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\nContent-Security-Policy: \(policy)\r\n\r\n"
         var response = Data(headers.utf8)
         response.append(body)
@@ -93,6 +116,7 @@ final class LoopbackAssetServer {
 
     func stop() {
         queue.async { [self] in
+            startTimeout?.cancel()
             listener?.cancel()
             for connection in connections.values { connection.cancel() }
             connections.removeAll()
