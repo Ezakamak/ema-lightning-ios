@@ -116,7 +116,7 @@ Do not intentionally break production D1 to test 503: that path is tested in iso
 unchanged bundled dictionary. Startup and inference never await networking. App startup
 and foreground activation check when due (24h after success); manual check bypasses the
 interval. A main-actor single-flight guard coalesces concurrent requests. Failure backoff
-starts at 5 minutes and doubles to 24h, persisted across launches. URLSession is ephemeral,
+starts at 5 minutes and doubles up to about 10h 40m, persisted across launches. URLSession is ephemeral,
 without cookies/cache, 15s request / 30s resource timeout, no connectivity waiting.
 
 Only GET version/full requests are made. Metadata uses If-None-Match. Same versions never
