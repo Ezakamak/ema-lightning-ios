@@ -58,7 +58,7 @@ struct SettingsView: View {
                 }
                 Section("Gizlilik ve destek") {
                     Link("Gizlilik politikası", destination: URL(string: "https://speak.ekatech.net/privacy")!)
-                    Link("Destek", destination: URL(string: "https://speak.ekatech.net/support")!)
+                    Link("Destek", destination: URL(string: "mailto:contact@ekatech.net")!)
                 }
                 Section("Açık kaynak") {
                     NavigationLink("Lisanslar ve teşekkür") { LicensesView() }

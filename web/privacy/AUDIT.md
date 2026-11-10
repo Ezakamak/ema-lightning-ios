@@ -67,14 +67,13 @@ server-side collection. The manifest's empty list is evidence, not proof of comp
 
 ## Explicitly unresolved before submission
 
-- Which signed release will be submitted and whether it includes PR #11.
+- The final release includes PR #11; its build number and Apple processing must be verified after upload.
 - Exact provider/security log retention and handling of support correspondence.
   Public policy explicitly states no verified retention duration rather than inventing one.
 - Delivery to the published support mailbox was not tested; no email was sent.
 - Physical iPhone/iPad Safari and airplane-mode verification were not performed.
-- In-app access to the policy: reviewed Settings has source/license links but no privacy
-  link. Apple requires an easily accessible in-app policy link. Add one in a separate
-  app update; this task intentionally does not change the app.
+- In-app policy access is included by this integrated release in Settings.
+- The existing App Store support URL (`https://speak.ekatech.net/support`) returned HTTP 404 during integration. Fix the published support page or Store metadata before a new submission. The in-app support link uses the published email address.
 - Legal entity/address and jurisdiction-specific legal review were not supplied. The
   policy uses the existing EKATECH brand/contact and makes no invented legal guarantees.
 
