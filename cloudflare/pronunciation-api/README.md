@@ -97,7 +97,7 @@ boundary. CI checks do not contain deployment credentials or automatically publi
 
 Account f675233e9a1e54a261896105ebb7f6c9; D1 ema_pronunciations
 (5c9f50f3-97c7-4a19-9791-7344bda006d3); Worker ema-pronunciation-api; binding DB.
-Rate-limit namespace 1001 is local to this Worker (60 requests per IP per minute per location).
+Rate-limit namespace 1001 is reserved for this Worker in this account; existing Worker binding inventory showed no collision (60 requests per IP per minute per location).
 It is an approximate abuse limit, not a billing/security quota; IPs are never written to D1.
 
 The pre-existing proxied CNAME points to ekatech-homepage-git.pages.dev and the Pages
@@ -120,7 +120,7 @@ starts at 5 minutes and doubles to 24h, persisted across launches. URLSession is
 without cookies/cache, 15s request / 30s resource timeout, no connectivity waiting.
 
 Only GET version/full requests are made. Metadata uses If-None-Match. Same versions never
-redownload rules. Downloads are streamed with a byte cap, decoded, validated for schema,
+redownload rules. Downloads are streamed with a byte cap, staged in a protected temporary file, decoded, validated for schema,
 locale, counts, duplicate normalized keys, rule syntax, checksum and monotonic version.
 Metadata/full mismatches are retried later. Validated data is atomically written with
 completeUntilFirstUserAuthentication protection and excluded from backup. Failed/partial

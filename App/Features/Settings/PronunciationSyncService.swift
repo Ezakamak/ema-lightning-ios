@@ -102,8 +102,7 @@ final class PronunciationSyncService: ObservableObject {
             }
             let (snapshotData, snapshotResponse) = try await fetch(URLRequest(url: baseURL))
             guard snapshotResponse.statusCode == 200 else { throw SyncFailure.response }
-            let snapshot = try JSONDecoder().decode(CentralDictionary.self, from: snapshotData)
-            try snapshot.validate()
+            let snapshot = try stageAndValidate(snapshotData)
             // Different edge entries can be up to five minutes apart: retry later, never install a mismatch.
             guard snapshot.version == version.version, snapshot.checksum == version.checksum,
                   snapshot.ruleCount == version.ruleCount else { throw SyncFailure.invalid }
@@ -133,6 +132,18 @@ final class PronunciationSyncService: ObservableObject {
             data.append(byte)
         }
         return (data, http)
+    }
+    private func stageAndValidate(_ data: Data) throws -> CentralDictionary {
+        let manager = FileManager.default
+        try manager.createDirectory(at: directory, withIntermediateDirectories: true,
+                                    attributes: [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication])
+        let temporary = directory.appendingPathComponent(".download-\(UUID().uuidString).json")
+        defer { try? manager.removeItem(at: temporary) }
+        try data.write(to: temporary, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+        let staged = try Data(contentsOf: temporary)
+        let snapshot = try JSONDecoder().decode(CentralDictionary.self, from: staged)
+        try snapshot.validate()
+        return snapshot
     }
     private func persist(_ data: Data) throws {
         let manager = FileManager.default
