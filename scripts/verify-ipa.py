@@ -22,3 +22,14 @@ with zipfile.ZipFile(sys.argv[1]) as archive:
     assert info['NSAppTransportSecurity']['NSAllowsLocalNetworking'] is True
     assert not info['NSAppTransportSecurity'].get('NSAllowsArbitraryLoads', False)
     print(f"Verified {len(manifest['files'])} bundled model/runtime/license assets in unsigned IPA.")
+
+    mp3 = json.loads(archive.read(prefix + 'MP3/ASSETS.json'))
+    for entry in mp3['files']:
+        data = archive.read(prefix + 'MP3/' + entry['path'])
+        assert len(data) == entry['bytes'] and hashlib.sha256(data).hexdigest() == entry['sha256'], entry['path']
+    assert archive.read(prefix + 'Brand/Logo-original.jpg') == Path('App/Resources/Brand/Logo-original.jpg').read_bytes()
+    assert any(p.startswith(prefix + 'AppIcon') and p.endswith('.png') for p in archive.namelist()), 'Missing application icon'
+    privacy = plistlib.loads(archive.read(prefix + 'PrivacyInfo.xcprivacy'))
+    assert privacy['NSPrivacyTracking'] is False
+    assert 'audio' in info['UIBackgroundModes']
+    print(f"Verified {len(mp3['files'])} MP3 encoder/source/license assets, original logo, icon and privacy manifest.")

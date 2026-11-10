@@ -1,0 +1,792 @@
+[
+  {
+    "word": "Apple",
+    "pronunciation": "epıl",
+    "category": "Apple"
+  },
+  {
+    "word": "iPhone",
+    "pronunciation": "ayfon",
+    "category": "Apple"
+  },
+  {
+    "word": "iPad",
+    "pronunciation": "ayped",
+    "category": "Apple"
+  },
+  {
+    "word": "iOS",
+    "pronunciation": "ay o es",
+    "category": "Apple"
+  },
+  {
+    "word": "macOS",
+    "pronunciation": "mek o es",
+    "category": "Apple"
+  },
+  {
+    "word": "MacBook",
+    "pronunciation": "mek buk",
+    "category": "Apple"
+  },
+  {
+    "word": "iMac",
+    "pronunciation": "ay mek",
+    "category": "Apple"
+  },
+  {
+    "word": "iCloud",
+    "pronunciation": "ay klaud",
+    "category": "Apple"
+  },
+  {
+    "word": "iMessage",
+    "pronunciation": "ay mesıc",
+    "category": "Apple"
+  },
+  {
+    "word": "AirPods",
+    "pronunciation": "er pods",
+    "category": "Apple"
+  },
+  {
+    "word": "AirTag",
+    "pronunciation": "er teg",
+    "category": "Apple"
+  },
+  {
+    "word": "AirDrop",
+    "pronunciation": "er drop",
+    "category": "Apple"
+  },
+  {
+    "word": "Apple Watch",
+    "pronunciation": "epıl voç",
+    "category": "Apple"
+  },
+  {
+    "word": "Apple Pay",
+    "pronunciation": "epıl pey",
+    "category": "Apple"
+  },
+  {
+    "word": "App Store",
+    "pronunciation": "ep stor",
+    "category": "Apple"
+  },
+  {
+    "word": "Face ID",
+    "pronunciation": "feys ay di",
+    "category": "Apple"
+  },
+  {
+    "word": "Touch ID",
+    "pronunciation": "taç ay di",
+    "category": "Apple"
+  },
+  {
+    "word": "Google",
+    "pronunciation": "gugıl",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Google Maps",
+    "pronunciation": "gugıl meps",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Google Drive",
+    "pronunciation": "gugıl drayv",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Google Meet",
+    "pronunciation": "gugıl mit",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Google Play",
+    "pronunciation": "gugıl piley",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Gmail",
+    "pronunciation": "ci meyl",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "YouTube",
+    "pronunciation": "yutub",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "YouTube Music",
+    "pronunciation": "yutub myuzik",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "YouTube Premium",
+    "pronunciation": "yutub primyum",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "WhatsApp",
+    "pronunciation": "vatsap",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Facebook",
+    "pronunciation": "feysbuk",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Messenger",
+    "pronunciation": "mesıncır",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "LinkedIn",
+    "pronunciation": "linkt in",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Twitter",
+    "pronunciation": "tivitır",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Snapchat",
+    "pronunciation": "snepçet",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Pinterest",
+    "pronunciation": "pintrıst",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Reddit",
+    "pronunciation": "redit",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Discord",
+    "pronunciation": "diskord",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Twitch",
+    "pronunciation": "tviç",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Spotify",
+    "pronunciation": "spotifay",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Netflix",
+    "pronunciation": "netfliks",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Disney Plus",
+    "pronunciation": "dizni plas",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Disney+",
+    "pronunciation": "dizni plas",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Microsoft",
+    "pronunciation": "maykrosoft",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Windows",
+    "pronunciation": "vindovs",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Outlook",
+    "pronunciation": "autluk",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "OneDrive",
+    "pronunciation": "van drayv",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "PowerPoint",
+    "pronunciation": "pavır poynt",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Excel",
+    "pronunciation": "eksel",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Teams",
+    "pronunciation": "timz",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Word",
+    "pronunciation": "vörd",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Office",
+    "pronunciation": "ofis",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Edge",
+    "pronunciation": "ec",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Chrome",
+    "pronunciation": "krom",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Firefox",
+    "pronunciation": "fayırfoks",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Huawei",
+    "pronunciation": "huavey",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Xiaomi",
+    "pronunciation": "şaomi",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "OnePlus",
+    "pronunciation": "van plas",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "NVIDIA",
+    "pronunciation": "envidya",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "PlayStation",
+    "pronunciation": "piley steyşın",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Xbox",
+    "pronunciation": "eks boks",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Steam",
+    "pronunciation": "stim",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Epic Games",
+    "pronunciation": "epik geymz",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Minecraft",
+    "pronunciation": "maynkraft",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Roblox",
+    "pronunciation": "robloks",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Zoom",
+    "pronunciation": "zum",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Skype",
+    "pronunciation": "skayp",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Adobe",
+    "pronunciation": "adobi",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Photoshop",
+    "pronunciation": "fotoşop",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Lightroom",
+    "pronunciation": "layt rum",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Canva",
+    "pronunciation": "kenva",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Notion",
+    "pronunciation": "noşın",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Figma",
+    "pronunciation": "figma",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Slack",
+    "pronunciation": "slek",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Dropbox",
+    "pronunciation": "drop boks",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Amazon",
+    "pronunciation": "emezın",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "Amazon Prime",
+    "pronunciation": "emezın praym",
+    "category": "Marka ve uygulamalar"
+  },
+  {
+    "word": "ChatGPT",
+    "pronunciation": "çet ci pi ti",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Chat GPT",
+    "pronunciation": "çet ci pi ti",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "GPT",
+    "pronunciation": "ci pi ti",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "OpenAI",
+    "pronunciation": "opın ey ay",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Claude",
+    "pronunciation": "klod",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Copilot",
+    "pronunciation": "ko paylıt",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Gemini",
+    "pronunciation": "cemınay",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Midjourney",
+    "pronunciation": "mid cörni",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "DALL-E",
+    "pronunciation": "dali",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Hugging Face",
+    "pronunciation": "hagin feys",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "GitHub",
+    "pronunciation": "git hab",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "GitLab",
+    "pronunciation": "git leb",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "SwiftUI",
+    "pronunciation": "svift yu ay",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Swift",
+    "pronunciation": "svift",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Xcode",
+    "pronunciation": "eks kod",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "React Native",
+    "pronunciation": "riyekt neytiv",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "React",
+    "pronunciation": "riyekt",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "JavaScript",
+    "pronunciation": "cava skript",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "TypeScript",
+    "pronunciation": "tayp skript",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Python",
+    "pronunciation": "paytın",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Node.js",
+    "pronunciation": "nod cey es",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": ".NET",
+    "pronunciation": "dot net",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "C#",
+    "pronunciation": "si şarp",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "C++",
+    "pronunciation": "si plas plas",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Docker",
+    "pronunciation": "dokır",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Kubernetes",
+    "pronunciation": "kubırnetiz",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Firebase",
+    "pronunciation": "fayır beys",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Supabase",
+    "pronunciation": "supa beys",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "PostgreSQL",
+    "pronunciation": "post gres es kyu el",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "MySQL",
+    "pronunciation": "may es kyu el",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "SQLite",
+    "pronunciation": "es kyu el layt",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "JSON",
+    "pronunciation": "ceysın",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "Flutter",
+    "pronunciation": "flatır",
+    "category": "Yapay zekâ ve geliştirme"
+  },
+  {
+    "word": "AI",
+    "pronunciation": "ey ay",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "API",
+    "pronunciation": "ey pi ay",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "UI",
+    "pronunciation": "yu ay",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "UX",
+    "pronunciation": "yu eks",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "CPU",
+    "pronunciation": "si pi yu",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "GPU",
+    "pronunciation": "ci pi yu",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "AMD",
+    "pronunciation": "ey em di",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "RAM",
+    "pronunciation": "rem",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "SSD",
+    "pronunciation": "es es di",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "USB",
+    "pronunciation": "yu es bi",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "USB-C",
+    "pronunciation": "yu es bi si",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "Wi-Fi",
+    "pronunciation": "vay fay",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "WiFi",
+    "pronunciation": "vay fay",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "Bluetooth",
+    "pronunciation": "blu tut",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "VPN",
+    "pronunciation": "vi pi en",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "GPS",
+    "pronunciation": "ci pi es",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "PDF",
+    "pronunciation": "pi di ef",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "JPEG",
+    "pronunciation": "cey peg",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "JPG",
+    "pronunciation": "cey pi ci",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "PNG",
+    "pronunciation": "pi en ci",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "MP3",
+    "pronunciation": "em pi üç",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "MP4",
+    "pronunciation": "em pi dört",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "WAV",
+    "pronunciation": "veyv",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "AAC",
+    "pronunciation": "ey ey si",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "HTML",
+    "pronunciation": "eyç ti em el",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "CSS",
+    "pronunciation": "si es es",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "SQL",
+    "pronunciation": "es kyu el",
+    "category": "Kısaltma ve bağlantı"
+  },
+  {
+    "word": "download",
+    "pronunciation": "daunlod",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "upload",
+    "pronunciation": "aplod",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "update",
+    "pronunciation": "apdeyt",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "backup",
+    "pronunciation": "bekap",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "online",
+    "pronunciation": "onlayn",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "offline",
+    "pronunciation": "oflayn",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "e-mail",
+    "pronunciation": "imeyl",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "email",
+    "pronunciation": "imeyl",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "mail",
+    "pronunciation": "meyl",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "podcast",
+    "pronunciation": "podkest",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "streaming",
+    "pronunciation": "striming",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "screenshot",
+    "pronunciation": "skrin şat",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "feedback",
+    "pronunciation": "fidbek",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "startup",
+    "pronunciation": "startap",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "workshop",
+    "pronunciation": "vörkşap",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "meeting",
+    "pronunciation": "miting",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "deadline",
+    "pronunciation": "dedlayn",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "freelance",
+    "pronunciation": "fri lens",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "freelancer",
+    "pronunciation": "fri lensır",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "browser",
+    "pronunciation": "brauzır",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "cloud",
+    "pronunciation": "klaud",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "server",
+    "pronunciation": "sörvır",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "software",
+    "pronunciation": "softver",
+    "category": "Günlük yabancı kelimeler"
+  },
+  {
+    "word": "hardware",
+    "pronunciation": "hardver",
+    "category": "Günlük yabancı kelimeler"
+  }
+]
