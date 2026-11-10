@@ -84,6 +84,8 @@ async function main() {
   const versions = await check('/v1/apps/' + exactApp.id + '/appStoreVersions?filter[platform]=IOS&limit=20', jwt, 'App Store versions');
   for (const v of versions.data?.data || []) {
     console.log('App Store version: ' + JSON.stringify({id:v.id, version:v.attributes.versionString, state:v.attributes.appStoreState}));
+    const selected = await check('/v1/appStoreVersions/' + v.id + '/build', jwt, 'App Store selected build');
+    console.log('Selected build: ' + JSON.stringify({id:selected.data?.data?.id,version:selected.data?.data?.attributes?.version}));
     const localizations = await check('/v1/appStoreVersions/' + v.id + '/appStoreVersionLocalizations', jwt, 'Version metadata');
     for (const l of localizations.data?.data || []) console.log('Metadata: ' + JSON.stringify({id:l.id,locale:l.attributes.locale,description:!!l.attributes.description,keywords:!!l.attributes.keywords,supportUrl:l.attributes.supportUrl,marketingUrl:l.attributes.marketingUrl}));
   }

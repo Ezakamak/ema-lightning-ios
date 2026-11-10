@@ -1,7 +1,7 @@
 # EMA Lightning privacy website
 
 Buildless, bilingual HTML source with local CSS/JS only. Build: `node web/privacy/scripts/build.mjs`.
-CI checks use GitHub Actions per the root AGENTS.md. No iOS app changes.
+CI checks use GitHub Actions per the root AGENTS.md. The integrated release adds the policy link in iOS Settings.
 
 ## Hosting and impact
 

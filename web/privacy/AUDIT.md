@@ -103,3 +103,12 @@ those instructions, no alternate browser-control path or browser installation
 was attempted. Responsive layout, TR/EN links and theme code were source-reviewed;
 actual Safari rendering, interactive theme selection and system-theme changes
 remain unverified. No claim of App Store approval is made.
+
+## Integrated release update
+
+PR #11 merged at `8ee71cd51f5a560de93b2fdfbb5d19d6711ebfd0` on 2026-11-10.
+The next signed release includes D1 sync, offline fallback and the Settings privacy link.
+PR #3 (`165b5e3`) and PR #4 (`a3adaa6`) are both ancestors of main: their diagnostics,
+Studio, history and export implementations are already included. Public TR/EN policies
+now identify dictionary sync as integrated. Infrastructure retention and App Privacy
+answers remain separate release-review checks; no unverified disclosure was changed.
