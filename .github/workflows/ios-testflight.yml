@@ -36,7 +36,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Validate Apple API and provisioning before compiling
-        run: node scripts/check-apple-api.cjs
+        run: |
+          node scripts/check-apple-api.cjs
+          python3 scripts/check-repository.py
       - name: Select Xcode 26
         run: |
           set -euo pipefail
@@ -131,7 +133,7 @@ jobs:
 
       - name: Upload export logs for troubleshooting
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ema-testflight-export
           if-no-files-found: warn
