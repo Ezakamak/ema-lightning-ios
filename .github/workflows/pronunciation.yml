@@ -31,12 +31,13 @@ jobs:
           xcodebuild -version
       - name: SpeechCore tests
         run: swift test --package-path Packages/SpeechCore
-      - name: Sync integration tests (no ONNX or UI rerun)
+      - name: Focused sync and offline EMA tests
         run: |
-          device=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for a in d["devices"].values() for x in a if "iPhone" in x["name"]))')
+          device=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k in sorted(d["devices"], reverse=True) for x in d["devices"][k] if "iPhone" in x["name"]))')
+          echo "Selected simulator: $device"
           xcrun simctl boot "$device" || true
           xcrun simctl bootstatus "$device" -b
-          xcodebuild test -project EMALightning.xcodeproj -scheme EMALightning -destination "platform=iOS Simulator,id=$device" -only-testing:EMAIntegrationTests/PronunciationSyncTests -parallel-testing-enabled NO -maximum-concurrent-test-simulator-destinations 1 CODE_SIGNING_ALLOWED=NO -resultBundlePath build/Pronunciation.xcresult
+          xcodebuild test -project EMALightning.xcodeproj -scheme EMALightning -destination "platform=iOS Simulator,id=$device" -only-testing:EMAIntegrationTests/PronunciationSyncTests -test-timeouts-enabled YES -maximum-test-execution-time-allowance 240 -parallel-testing-enabled NO -maximum-concurrent-test-simulator-destinations 1 CODE_SIGNING_ALLOWED=NO -resultBundlePath build/Pronunciation.xcresult
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

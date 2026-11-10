@@ -163,5 +163,5 @@ This implementation does not itself create analytics or persist device/IP identi
 Swift tests simulate the network with URLProtocol on an iOS simulator through the separate
 GitHub Actions dictionary workflow, plus existing SpeechCore tests. These are independent
 of TestFlight, which was not changed. Physical iPhone testing, actual airplane mode, audible
-ONNX quality, export regressions and battery behavior require a real device. Mock rule
-snapshots verify request isolation; they are not a replacement for on-device synthesis.
+ONNX quality, export regressions and battery behavior require a real device. The focused suite also renders bundled ONNX audio while the dictionary changes, then renders
+again with the updated rules after a simulated network outage. This does not replace device testing.

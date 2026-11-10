@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import XCTest
+import UIKit
 import SpeechCore
 @testable import EMALightning
 
@@ -26,7 +27,9 @@ final class PronunciationSyncTests: XCTestCase {
                                  updatedAt: "2026-11-10T00:00:00Z", checksum: CentralDictionary.digest(rules), rules: rules)
     }
     private func make(_ directory: URL, _ defaults: UserDefaults) -> PronunciationSyncService {
-        let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [DictionaryURLProtocol.self]
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 15; config.timeoutIntervalForResource = 30
+        config.protocolClasses = [DictionaryURLProtocol.self]
         return PronunciationSyncService(session: URLSession(configuration: config), directory: directory, defaults: defaults)
     }
     private func setup() -> (URL, UserDefaults) {
@@ -128,6 +131,44 @@ final class PronunciationSyncTests: XCTestCase {
         try store.remove(try XCTUnwrap(store.personal.first))
         XCTAssertEqual(store.effectiveRules.first { $0.id == "iphone" }?.pronunciation, "ayfon")
         XCTAssertEqual(PronunciationStore(defaults: defaults, sync: service).personal.count, 0)
+    }
+    func testRealEMARequestKeepsSnapshotDuringSyncAndNextRequestWorksOffline() async throws {
+        let (directory, defaults) = setup(), service = make(directory, defaults)
+        try serve(fixture()); await service.check(force: true)
+        let store = PronunciationStore(defaults: defaults, sync: service)
+        let engine = EMASpeechEngine(pronunciations: store)
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        let controller = UIViewController()
+        window.rootViewController = controller; window.makeKeyAndVisible()
+        let host = InferenceHostView(engine: engine)
+        controller.view.addSubview(host)
+        host.frame = CGRect(x: 0, y: 0, width: 160, height: 80)
+        host.layoutIfNeeded()
+        defer { engine.stop(); window.isHidden = true }
+        var finished = false
+        let rendering = Task { @MainActor in
+            defer { finished = true }
+            return try await engine.render(SpeechRequest(text: "iPhone."))
+        }
+        defer { rendering.cancel() }
+        // perform() captures its lexicon before its first await and begins diagnostics in that turn.
+        while engine.diagnostics.trace == nil { await Task.yield() }
+        let rules = [PronunciationRule(word: "iPhone", pronunciation: "telefon", category: "Apple")]
+        let updated = CentralDictionary(version: 2, schemaVersion: 1, locale: "tr-TR", ruleCount: 1,
+            updatedAt: "2026-11-10T00:00:00Z", checksum: CentralDictionary.digest(rules), rules: rules)
+        try serve(updated); await service.check(force: true)
+        XCTAssertEqual(service.dictionary?.version, 2)
+        XCTAssertFalse(finished, "The dictionary update must overlap the real request")
+        let first = try await rendering.value
+        XCTAssertTrue(first.normalizedText.contains("ayfon"))
+        XCTAssertFalse(first.normalizedText.contains("telefon"))
+        XCTAssertGreaterThan(first.rms, 1e-5)
+        DictionaryURLProtocol.handler = { _ in throw URLError(.notConnectedToInternet) }
+        await service.check(force: true)
+        let next = try await engine.render(SpeechRequest(text: "iPhone."))
+        XCTAssertTrue(next.normalizedText.contains("telefon"))
+        XCTAssertGreaterThan(next.sampleCount, 4800)
+        XCTAssertGreaterThan(next.rms, 1e-5)
     }
     func testBackoffAndSingleFlight() async throws {
         let (directory, defaults) = setup(), service = make(directory, defaults)
