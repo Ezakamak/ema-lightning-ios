@@ -91,3 +91,12 @@ workflow; no success summary is written for those stages.
 - [Supported upload tools](https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds/):
   altool remains supported for iOS uploads. Its macOS notarization deprecation
   does not apply to iOS delivery; the current CLI prefers `--upload-package`.
+
+## App bundle validation
+
+The first correctly addressed upload reached Apple's validator and reported
+90474 (missing orientations), 90022/90023 (missing iPhone/iPad icons), and 90713
+(missing icon catalog name). The app now includes original opaque speech-bubble
+and lightning icons at all iPhone/iPad/marketing sizes, an `AppIcon` asset catalog
+registered in the Xcode resource phase, and all four supported orientations.
+Repository checks verify those source requirements without simulator tests.
