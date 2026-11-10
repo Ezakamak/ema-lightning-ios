@@ -59,3 +59,44 @@ final class SpeechUITests: XCTestCase {
         attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)
     }
 }
+
+// Separate opt-in suite: no inference faults, fake records or changes to shipping UI.
+final class IPadAppStoreScreenshotTests: XCTestCase {
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+        guard ProcessInfo.processInfo.environment["EMA_IPAD_SCREENSHOTS"] == "1" else {
+            throw XCTSkip("Run the dedicated iPad screenshots workflow to capture App Store screens")
+        }
+    }
+
+    func testTurkishAppStoreScreens() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["--uitest-clean", "-AppleLanguages", "(tr)", "-AppleLocale", "tr_TR"]
+        app.launch()
+        XCTAssertTrue(app.buttons["readButton"].waitForExistence(timeout: 30))
+        // Populate using the real example-text action; no keyboard in the screenshot.
+        app.buttons["Metin seçenekleri"].tap()
+        app.buttons["Örnek metin"].tap()
+        capture(app, name: "01-Olustur", title: "Oluştur")
+        app.buttons["tab-1"].tap()
+        capture(app, name: "02-Gecmis", title: "Geçmiş")
+        app.buttons["tab-2"].tap()
+        capture(app, name: "03-Ayarlar", title: "Ayarlar")
+        app.buttons["Telaffuz sözlüğü"].tap()
+        let builtIns = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Hazır (")).firstMatch
+        XCTAssertTrue(builtIns.waitForExistence(timeout: 10))
+        builtIns.tap()
+        capture(app, name: "04-Telaffuz", title: "Telaffuz sözlüğü")
+    }
+
+    private func capture(_ app: XCUIApplication, name: String, title: String) {
+        XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.keyboards.firstMatch.exists)
+        XCTAssertFalse(app.staticTexts["engineError"].exists)
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        attachment.name = "EMA-iPad-\(name)"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+}
