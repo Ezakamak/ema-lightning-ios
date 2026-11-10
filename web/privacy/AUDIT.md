@@ -1,0 +1,79 @@
+# Privacy review — 2026-11-10
+
+## Evidence scope
+
+Main iOS revision: `bba657d9ccf452ae72e06f71242fa0d89976c8af`.
+Also reviewed open PR #11 / `feat/central-pronunciation-sync` at
+`6adc1ef` because its API already has a production route on this hostname.
+A deployed API is not proof that the submitted iOS binary contains its client.
+The policy explicitly distinguishes versions with this feature. The exact App Store
+Connect binary and current App Privacy answers were not accessible in this review.
+No app behavior, permissions, dependencies or manifest were changed.
+
+| Finding | Source |
+| --- | --- |
+| Bundled EMA inference, no remote TTS | App/Infrastructure/EMASpeechEngine.swift; App/Resources/EMA/{tts.js,worker.js,bridge.js}; docs/DEPENDENCIES.md |
+| Loopback only; token path; same-origin CSP | App/Infrastructure/LoopbackAssetServer.swift |
+| Non-persistent WebKit | App/Infrastructure/EMASpeechEngine.swift:90 |
+| Automatically stores original text/WAV/title/date/duration/engine | App/Features/Speech/SpeechViewModel.swift; App/Features/Library/RecordingStore.swift |
+| Personal dictionary and preferences in UserDefaults | App/Features/Settings/{PronunciationStore,AppSettings}.swift |
+| User deletion controls | App/Features/Library/LibraryView.swift; App/Features/Settings/SettingsView.swift |
+| Local MP3/MP4 export; share sheet; cleanup of files >24h attempted at launch | App/Infrastructure/Export/{ExportCoordinator,MP3Encoder,CaptionVideoExporter}.swift |
+| Optional Apple preview via AVSpeechSynthesizer | App/Infrastructure/SystemSpeechEngine.swift |
+| Local diagnostic bridge, manually copied/shared reports | App/Resources/EMA/telemetry.js; App/Features/Speech/{EMADiagnostics,DiagnosticsPanel}.swift; Packages/SpeechCore/Sources/SpeechCore/DiagnosticTrace.swift |
+| No sensitive permission descriptions; background playback/local networking | App/Resources/Info.plist; EMALightning.xcodeproj/project.pbxproj |
+| Empty collected-data manifest, tracking false; UserDefaults CA92.1, timestamps C617.1 | App/Resources/PrivacyInfo.xcprivacy |
+| Sync branch: read-only HTTPS, ephemeral cookie-free URLSession, public rules only | PR #11 App/Features/Settings/PronunciationSyncService.swift |
+| API: IP rate limiter, no user-content insert | PR #11 cloudflare/pronunciation-api/src/index.js and migrations/0001_dictionary.sql; live settings checked via Cloudflare |
+| Contact address already published | https://ekatech.net and ekatech-corporate/site/index.html:34 |
+
+Search covered app Swift, JS, plist, project dependencies and source docs; bundled
+runtime fetches load local assets. Tests/build tooling may use GitHub/Apple APIs;
+those are not shipped app telemetry. No Firebase, advertising or crash SDK was
+found in this source scope. This is source review, not a network capture of a
+signed release. Apple system-service behavior is not independently certified.
+
+## App Store Connect recommendation
+
+Apple's collection definition distinguishes on-device processing from transmission
+for retention beyond servicing a real-time request. Read current Apple guidance:
+https://developer.apple.com/app-store/app-privacy-details/
+
+- **Reviewed main only:** `Data Not Collected` is supported for the app's own normal
+  TTS flow: local Other User Content (text), Audio Data, preferences and diagnostic
+  timings do not alone constitute off-device collection. Do not select these as
+  collected merely because files exist locally. Tracking: No.
+- **User-selected exports:** sharing to the user's selected destination is disclosed;
+  it is not automatic collection by EKATECH. Reassess any future upload-to-support flow.
+- **Email support:** Email Address and Customer Support (and any voluntarily attached
+  content) are processed if users contact support. Apple's optional-disclosure criteria
+  may apply only if all criteria are met (infrequent, optional, user initiated, clearly
+  disclosed). Do not silently assume exemption; confirm the actual support workflow.
+  If disclosure is required: App Functionality, linked to the sender, no tracking.
+- **PR #11 included:** verify IP rate-limiter and Cloudflare retention against the exact
+  binary and infrastructure. Transient real-time request processing may be excluded;
+  retained IP/security logs or metrics may require disclosure. IP classification is
+  purpose-dependent: consider Other Data Types (security/IP), Diagnostics/Other
+  Diagnostic Data for retained technical records, and Product Interaction if retained
+  request histories measure use. Do not select Device ID or Coarse Location unless
+  IP is actually used to identify devices or derive location. Purpose: App Functionality;
+  linkage must be assessed from real retention and joinability, not presumed anonymous.
+- Only disclose Crash Data / Performance Data if those reports are actually collected
+  remotely; local diagnostics alone do not qualify. If users send reports through
+  support, evaluate the optional-disclosure criteria above.
+
+Do not finalize `Data Not Collected` for an unreviewed signed binary or retained
+server-side collection. The manifest's empty list is evidence, not proof of compliance.
+
+## Explicitly unresolved before submission
+
+- Which signed release will be submitted and whether it includes PR #11.
+- Exact provider/security log retention and handling of support correspondence.
+  Public policy explicitly states no verified retention duration rather than inventing one.
+- Delivery to the published support mailbox was not tested; no email was sent.
+- Physical iPhone/iPad Safari and airplane-mode verification were not performed.
+- In-app access to the policy: reviewed Settings has source/license links but no privacy
+  link. Apple requires an easily accessible in-app policy link. Add one in a separate
+  app update; this task intentionally does not change the app.
+- Legal entity/address and jurisdiction-specific legal review were not supplied. The
+  policy uses the existing EKATECH brand/contact and makes no invented legal guarantees.
