@@ -15,3 +15,8 @@ jobs:
           node-version: '24'
       - run: node web/privacy/scripts/build.mjs
       - run: node --test web/privacy/tests/*.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: privacy-worker
+          path: web/privacy/dist/worker.mjs
+          if-no-files-found: error
