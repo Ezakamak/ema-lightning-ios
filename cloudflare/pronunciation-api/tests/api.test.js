@@ -7,7 +7,7 @@ import {key,validate,checksum} from '../src/dictionary.js';
 import worker from '../src/index.js';
 const rules=JSON.parse(readFileSync('../../App/Resources/EMA/pronunciations.json','utf8'));
 const migration=readFileSync('migrations/0001_dictionary.sql','utf8');
-const mf=new Miniflare({modules:true,scriptPath:'src/index.js',compatibilityDate:'2026-11-10',d1Databases:['DB']});
+const mf=new Miniflare({modules:true,modulesRules:[{type:'ESModule',include:['**/*.js']}],scriptPath:'src/index.js',compatibilityDate:'2026-08-06',d1Databases:['DB']});
 const db=await mf.getD1Database('DB');
 // D1 exec is line based, so keep the trigger on one line.
 await db.exec(migration.replace(/\n/g,' '));
