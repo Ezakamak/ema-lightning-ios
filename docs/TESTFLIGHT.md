@@ -96,7 +96,20 @@ workflow; no success summary is written for those stages.
 
 The first correctly addressed upload reached Apple's validator and reported
 90474 (missing orientations), 90022/90023 (missing iPhone/iPad icons), and 90713
-(missing icon catalog name). The app now includes original opaque speech-bubble
-and lightning icons at all iPhone/iPad/marketing sizes, an `AppIcon` asset catalog
+(missing icon catalog name). The app now includes original opaque original red crescent/microphone icons at all iPhone/iPad/marketing sizes, an `AppIcon` asset catalog
 registered in the Xcode resource phase, and all four supported orientations.
 Repository checks verify those source requirements without simulator tests.
+
+
+## Current Studio and original icon
+
+Build 10.1 used the previous main interface. The owner subsequently approved
+including the current Studio source from PR #4 (`a3adaa68`) and restoring the
+supplied red icon. The original JPEG is tracked unchanged at
+`App/Resources/Brand/Logo-original.jpg`. Run `python3 scripts/generate-app-icons.py`
+with Pillow installed to regenerate all opaque PNG sizes in
+`App/Assets.xcassets/AppIcon.appiconset`. The full original artwork and aspect
+ratio are preserved. Generated assets are committed; Actions verifies them
+before archive. The Studio Create/History/Settings, MP3/MP4 export and pronunciation
+features are included, with the working App Store identity and signing workflow.
+No simulator test jobs are reintroduced. Marketing version remains `0.1.0`.
