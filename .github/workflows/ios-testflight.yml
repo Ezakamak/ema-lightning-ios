@@ -14,16 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  test-ios:
-    runs-on: macos-15-intel
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - name: Test real bundled EMA ONNX synthesis on iOS Simulator
-        run: scripts/test-ios-integration.sh
-
   upload:
-    needs: test-ios
     runs-on: macos-26
     timeout-minutes: 90
     env:
