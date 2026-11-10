@@ -10,6 +10,10 @@ on:
         description: 'Yükleme için mevcut, düzenlenebilir App Store sürümü (ör. 0.3.0)'
         type: string
         required: false
+      recovery_run_id:
+        description: 'İsteğe bağlı: yeniden derlemeden, önceki çalışmanın xcresult görsellerini kurtar'
+        type: string
+        required: false
 permissions:
   contents: read
 concurrency:
@@ -25,6 +29,9 @@ jobs:
       - run: python3 -m unittest discover -s tests -p test_ipad_screenshot_upload.py
   capture:
     needs: validate
+    permissions:
+      contents: read
+      actions: read
     runs-on: macos-15
     timeout-minutes: 45
     env:
@@ -34,6 +41,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Capture Turkish iPad screens with Xcode UI Tests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RECOVERY_RUN_ID: ${{ inputs.recovery_run_id }}
         run: bash scripts/capture-ipad-screenshots.sh
       - name: Downloadable App Store PNGs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

@@ -89,3 +89,12 @@ Uploader’ın kapsam/geri alma testleri `tests/test_ipad_screenshot_upload.py`
 dosyasında bulunur ve capture öncesi Actions job’unda çalışır. İlk macOS çalışması
 henüz yapılmadı; gerçek simulator başarısı ve Apple API yüklemesi ancak ilgili
 Actions çalışmasıyla doğrulanabilir.
+
+## Yakalanmış test görsellerini kurtarma
+
+UI testi tamamlanmış ama son PNG işlemi veya artifact adımı kesilmişse,
+`recovery_run_id` alanına önceki Actions çalışma numarasını gir. Bu yol önceki
+`ipad-screenshot-diagnostics` artifact’indeki `.xcresult` içinden dört isimli
+ekranı çıkarır ve aynı boyut/format kontrollerini uygulayarak normal PNG artifact’ini
+oluşturur. Yeniden derleme/simülatör açılışı yapılmaz. Bu alan boşken uygulama
+her zaman yeniden açılır ve yeni ekran görüntüleri yakalanır.

@@ -2,6 +2,28 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p build
+export_screenshots() {
+xcrun xcresulttool export attachments --path build/iPadScreenshots.xcresult --output-path build/ipad-attachments
+python3 scripts/export-ipad-screenshots.py
+swift scripts/opaque-screenshots.swift build/ipad-screenshots/tr/*.png
+python3 - <<'PYTHON'
+import importlib.util
+from pathlib import Path
+spec = importlib.util.spec_from_file_location("exporter", "scripts/export-ipad-screenshots.py")
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+for path in Path("build/ipad-screenshots/tr").glob("*.png"):
+    module.validate_png(path)
+PYTHON
+}
+
+# Recover already captured XCTest attachments without another simulator build.
+if [[ -n "${RECOVERY_RUN_ID:-}" ]]; then
+  [[ "$RECOVERY_RUN_ID" =~ ^[0-9]+$ ]]
+  gh run download "$RECOVERY_RUN_ID" --repo "$GITHUB_REPOSITORY"     --name ipad-screenshot-diagnostics --dir build
+  export_screenshots
+  exit 0
+fi
 xcodebuild -version
 # Create a fresh, isolated simulator; never reuse an iPhone or a user's data.
 runtime="$(xcrun simctl list runtimes -j | python3 -c '
@@ -39,15 +61,4 @@ xcodebuild test -project EMALightning.xcodeproj -scheme EMALightning \
   -maximum-test-execution-time-allowance 180 \
   IPHONEOS_DEPLOYMENT_TARGET=18.4 CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES \
   2>&1 | tee build/ipad-screenshots.log
-xcrun xcresulttool export attachments --path build/iPadScreenshots.xcresult --output-path build/ipad-attachments
-python3 scripts/export-ipad-screenshots.py
-swift scripts/opaque-screenshots.swift build/ipad-screenshots/tr/*.png
-python3 - <<'PYTHON'
-import importlib.util
-from pathlib import Path
-spec = importlib.util.spec_from_file_location("exporter", "scripts/export-ipad-screenshots.py")
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
-for path in Path("build/ipad-screenshots/tr").glob("*.png"):
-    module.validate_png(path)
-PYTHON
+export_screenshots
