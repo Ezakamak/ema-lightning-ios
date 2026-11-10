@@ -64,6 +64,18 @@ async function main() {
     fail('Apple returned no exact matching app / Bundle ID. Check the existing App Store Connect app record before building.'); return;
   }
   console.log('Target app and Bundle ID exist. API read access does not prove cloud signing permission or local signing identity availability.');
+  if (process.env.VERIFY_BUILD_NUMBER) {
+    const expected = process.env.VERIFY_BUILD_NUMBER;
+    if (!/^[0-9.]+$/.test(expected)) throw new Error('Invalid build number to inspect.');
+    const result = await check('/v1/builds?filter[app]=' + exactApp.id + '&filter[version]=' + expected + '&limit=10', jwt, 'Uploaded build');
+    const build = result.data?.data?.find(item => item.attributes?.version === expected);
+    if (!build) throw new Error('Uploaded build is not visible in App Store Connect yet.');
+    const state = build.attributes.processingState;
+    console.log('Build ' + expected + ': Apple processing state = ' + state);
+    if (process.env.GITHUB_STEP_SUMMARY)
+      fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, 'Build ' + expected + ': processing state **' + state + '**. Tester access is managed separately.\n');
+    if (state === 'FAILED' || state === 'INVALID') throw new Error('Apple processing failed; inspect the App Store Connect build details.');
+  }
   // Write only after every preflight check passes, for Xcode and altool.
   if (process.env.ASC_KEY_DIRECTORY) {
     if (!/^[0-9]+$/.test(exactApp.id)) throw new Error('Target Apple app ID is invalid.');

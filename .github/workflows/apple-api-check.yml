@@ -1,6 +1,10 @@
 name: Apple API credential check
 on:
   workflow_dispatch:
+    inputs:
+      build_number:
+        description: Optional uploaded build number to inspect (read-only)
+        required: false
 permissions:
   contents: read
 concurrency:
@@ -16,6 +20,7 @@ jobs:
           persist-credentials: false
       - name: Read-only Apple API and provisioning preflight
         env:
+          VERIFY_BUILD_NUMBER: ${{ inputs.build_number }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
