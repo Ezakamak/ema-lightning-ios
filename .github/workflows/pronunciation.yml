@@ -1,9 +1,10 @@
 name: Pronunciation dictionary checks
 on:
   pull_request:
-  push:
-    branches: [feat/central-pronunciation-sync]
   workflow_dispatch:
+concurrency:
+  group: pronunciation-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
