@@ -64,12 +64,38 @@ async function main() {
     fail('Apple returned no exact matching app / Bundle ID. Check the existing App Store Connect app record before building.'); return;
   }
   console.log('Target app and Bundle ID exist. API read access does not prove cloud signing permission or local signing identity availability.');
+  const allBuilds = [];
+  let buildPath = '/v1/builds?filter[app]=' + exactApp.id + '&limit=200';
+  while (buildPath) {
+    const page = await check(buildPath, jwt, 'Build inventory');
+    if (page.status !== 200) throw new Error('Cannot determine highest Apple build.');
+    allBuilds.push(...page.data.data);
+    const next = page.data.links?.next;
+    if (next && new URL(next).origin !== 'https://api.appstoreconnect.apple.com') throw new Error('Unexpected pagination origin');
+    buildPath = next ? new URL(next).pathname + new URL(next).search : null;
+  }
+  const parts = v => v.split('.').map(Number);
+  const compare = (a,b) => { const x=parts(a), y=parts(b); for(let i=0;i<3;i++) {const d=(x[i]||0)-(y[i]||0); if(d) return d;} return 0; };
+  const highest = allBuilds.map(b=>b.attributes.version).sort(compare).at(-1) || '0';
+  console.log('Highest Apple build: ' + highest);
+  const nextBuild = String(parts(highest)[0] + 1);
+  if (process.env.GITHUB_ENV) fs.appendFileSync(process.env.GITHUB_ENV, 'NEXT_BUILD_NUMBER=' + nextBuild + '\n');
+  if (process.env.BUILD_NUMBER && compare(process.env.BUILD_NUMBER, highest) <= 0) throw new Error('Requested build must exceed highest Apple build.');
+  const versions = await check('/v1/apps/' + exactApp.id + '/appStoreVersions?filter[platform]=IOS&limit=20', jwt, 'App Store versions');
+  for (const v of versions.data?.data || []) {
+    console.log('App Store version: ' + JSON.stringify({id:v.id, version:v.attributes.versionString, state:v.attributes.appStoreState}));
+    const localizations = await check('/v1/appStoreVersions/' + v.id + '/appStoreVersionLocalizations', jwt, 'Version metadata');
+    for (const l of localizations.data?.data || []) console.log('Metadata: ' + JSON.stringify({id:l.id,locale:l.attributes.locale,description:!!l.attributes.description,keywords:!!l.attributes.keywords,supportUrl:l.attributes.supportUrl,marketingUrl:l.attributes.marketingUrl}));
+  }
   if (process.env.VERIFY_BUILD_NUMBER) {
     const expected = process.env.VERIFY_BUILD_NUMBER;
     if (!/^[0-9.]+$/.test(expected)) throw new Error('Invalid build number to inspect.');
     const result = await check('/v1/builds?filter[app]=' + exactApp.id + '&filter[version]=' + expected + '&limit=10', jwt, 'Uploaded build');
     const build = result.data?.data?.find(item => item.attributes?.version === expected);
     if (!build) throw new Error('Uploaded build is not visible in App Store Connect yet.');
+    console.log('Apple build metadata: ' + JSON.stringify({id:build.id,...build.attributes}));
+    const beta = await check('/v1/builds/' + build.id + '/buildBetaDetail', jwt, 'TestFlight availability');
+    console.log('TestFlight: ' + JSON.stringify(beta.data?.data?.attributes));
     const state = build.attributes.processingState;
     console.log('Build ' + expected + ': Apple processing state = ' + state);
     if (process.env.GITHUB_STEP_SUMMARY)

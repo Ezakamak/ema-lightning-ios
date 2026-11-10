@@ -43,7 +43,8 @@ struct EMALightningApp: App {
         }
     }
     private var screen: some View {
-        StudioRootView(model: model).onChange(of: scenePhase) { _, phase in
+        StudioRootView(model: model).task { await model.pronunciations.sync.check() }.onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await model.pronunciations.sync.check() } }
             if phase == .background { model.stop() }
         }
     }

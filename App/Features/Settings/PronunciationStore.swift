@@ -14,12 +14,14 @@ final class PronunciationStore: ObservableObject {
     @Published private(set) var personal: [PersonalPronunciation] = []
     @Published private(set) var loadError: String?
     @Published var useBuiltIns: Bool { didSet { defaults.set(useBuiltIns, forKey: "pronunciation.useBuiltIns") } }
+    let sync: PronunciationSyncService
     let builtIns: [PronunciationRule]
     private let defaults: UserDefaults
     private let storageKey = "pronunciation.personal.v1"
 
-    init(defaults: UserDefaults = .standard, bundle: Bundle = .main) {
+    init(defaults: UserDefaults = .standard, bundle: Bundle = .main, sync: PronunciationSyncService? = nil) {
         self.defaults = defaults
+        self.sync = sync ?? PronunciationSyncService(defaults: defaults)
         useBuiltIns = defaults.object(forKey: "pronunciation.useBuiltIns") as? Bool ?? true
         if let url = bundle.url(forResource: "pronunciations", withExtension: "json", subdirectory: "EMA"),
            let data = try? Data(contentsOf: url), let entries = try? JSONDecoder().decode([PronunciationRule].self, from: data) {
@@ -33,9 +35,14 @@ final class PronunciationStore: ObservableObject {
             catch { loadError = "Kişisel sözlük açılamadı; kayıtlı veri korunuyor." }
         }
     }
+    var availableRules: [PronunciationRule] {
+        var rules = Dictionary(uniqueKeysWithValues: builtIns.map { ($0.id, $0) })
+        for rule in sync.dictionary?.rules ?? [] { rules[rule.id] = rule }
+        return rules.values.sorted { $0.id < $1.id }
+    }
     var effectiveRules: [PronunciationRule] {
         let overridden = Set(personal.map { $0.rule.id })
-        let base = useBuiltIns ? builtIns.filter { !overridden.contains($0.id) } : []
+        let base = useBuiltIns ? availableRules.filter { !overridden.contains($0.id) } : []
         return base + personal.filter(\.enabled).map(\.rule)
     }
     var privateValues: [String] { personal.flatMap { [$0.rule.word, $0.rule.pronunciation] } }
