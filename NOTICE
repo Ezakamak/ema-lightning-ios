@@ -1,0 +1,14 @@
+EMA Lightning iOS
+Independent iOS implementation, distributed under Apache-2.0.
+
+Acknowledgments:
+- Canberk Aslan: original EMA Lightning model and Python project.
+  https://github.com/canberk7/ema-lightning
+- Özcan Çelik: EMA Lightning ONNX/web adaptation.
+  https://github.com/ozcancelik/ema-lightning-web
+
+This initial native application does not bundle upstream code, model weights,
+ONNX Runtime, normalizer-tr, web assets, or fonts. The system voice preview uses
+Apple AVFoundation. Upstream license and notice snapshots are preserved under
+licenses/upstream for provenance; their presence does not imply those binaries
+are included. See docs/DEPENDENCIES.md for scope and integration requirements.

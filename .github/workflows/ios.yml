@@ -1,0 +1,79 @@
+name: iOS unsigned IPA
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Test domain package
+        run: swift test --package-path Packages/SpeechCore
+      - name: Check repository contracts
+        run: python3 scripts/check-repository.py
+      - name: Build and package unsigned IPA
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          version=0.1.0
+          if [[ "$REF_TYPE" == tag ]]; then version="${REF_NAME#v}"; fi
+          scripts/build-unsigned-ipa.sh "$version"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: unsigned-ipa
+          path: |
+            build/*.ipa
+            build/SHA256SUMS
+            LICENSE
+            NOTICE
+            docs/DEPENDENCIES.md
+            licenses/
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require a tag from main
+        run: git merge-base --is-ancestor HEAD origin/main
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: unsigned-ipa
+          path: release-assets
+      - name: Verify download and prepare release notices
+        run: |
+          (cd release-assets/build && sha256sum --check SHA256SUMS)
+          tar -czf release-assets/licenses.tar.gz -C release-assets LICENSE NOTICE docs licenses
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" --verify-tag --draft --title "EMA Lightning iOS $TAG" \
+            --notes-file docs/RELEASE-NOTES.md \
+            release-assets/build/*.ipa release-assets/build/SHA256SUMS release-assets/licenses.tar.gz

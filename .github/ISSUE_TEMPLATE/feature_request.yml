@@ -1,0 +1,20 @@
+name: Feature request / Özellik önerisi
+description: Propose an improvement / İyileştirme önerin
+title: '[Feature]: '
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and intended user / Sorun ve hedef kullanıcı
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed behavior and alternatives / Önerilen davranış ve alternatifler
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: New dependencies, models and licenses / Yeni bağımlılıklar, modeller ve lisanslar
