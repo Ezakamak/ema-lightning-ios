@@ -17,6 +17,8 @@ final class PronunciationStore: ObservableObject {
     let sync: PronunciationSyncService
     let builtIns: [PronunciationRule]
     private let defaults: UserDefaults
+    private var speechIndex: PronunciationIndex?
+    private var indexIdentity: String?
     private let storageKey = "pronunciation.personal.v1"
 
     init(defaults: UserDefaults = .standard, bundle: Bundle = .main, sync: PronunciationSyncService? = nil) {
@@ -45,6 +47,14 @@ final class PronunciationStore: ObservableObject {
         let base = useBuiltIns ? availableRules.filter { !overridden.contains($0.id) } : []
         return base + personal.filter(\.enabled).map(\.rule)
     }
+    func rulesForSpeech(_ text: String) -> [PronunciationRule] {
+        let identity = "\(useBuiltIns)-\(sync.dictionary?.schemaVersion ?? 0)-\(sync.dictionary?.version ?? 0)-\(sync.dictionary?.checksum ?? "")"
+        if speechIndex == nil || indexIdentity != identity {
+            speechIndex = PronunciationIndex(rules: effectiveRules)
+            indexIdentity = identity
+        }
+        return speechIndex!.candidates(in: text)
+    }
     var privateValues: [String] { personal.flatMap { [$0.rule.word, $0.rule.pronunciation] } }
     func personalOverride(for rule: PronunciationRule) -> PersonalPronunciation? { personal.first { $0.rule.id == rule.id } }
 
@@ -61,6 +71,7 @@ final class PronunciationStore: ObservableObject {
         guard loadError == nil else { throw StoreError.unavailable }
         defaults.set(try JSONEncoder().encode(updated), forKey: storageKey)
         personal = updated
+        speechIndex = nil
     }
     private enum StoreError: LocalizedError {
         case limit, duplicate, unavailable

@@ -20,6 +20,14 @@
         "limit": 60,
         "period": 60
       }
+    },
+    {
+      "name": "V2_RATE_LIMITER",
+      "namespace_id": "1002",
+      "simple": {
+        "limit": 1200,
+        "period": 60
+      }
     }
   ],
   "observability": {
@@ -40,6 +48,10 @@
   "routes": [
     {
       "pattern": "speak.ekatech.net/api/v1/*",
+      "zone_id": "b9bd29cd8b2078d7d8a33c720ca13e0d"
+    },
+    {
+      "pattern": "speak.ekatech.net/api/v2/*",
       "zone_id": "b9bd29cd8b2078d7d8a33c720ca13e0d"
     }
   ]

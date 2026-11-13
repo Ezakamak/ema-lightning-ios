@@ -2,13 +2,27 @@ name: Pronunciation dictionary checks
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      swift_only:
+        description: Run only Swift and real EMA checks (reuse unchanged Worker results)
+        type: boolean
+        default: false
+      browser_only:
+        description: Run only bundled offline ONNX in Chromium and retain WAV samples
+        type: boolean
+        default: false
+      simulator_runtime:
+        description: Installed iOS runtime identifier
+        type: string
+        default: iOS-26-2
 concurrency:
-  group: pronunciation-${{ github.ref }}
+  group: pronunciation-${{ github.ref }}-${{ inputs.browser_only && 'browser' || 'swift' }}
   cancel-in-progress: true
 permissions:
   contents: read
 jobs:
   worker:
+    if: github.event_name != 'workflow_dispatch' || (!inputs.swift_only && !inputs.browser_only)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -20,7 +34,32 @@ jobs:
           node-version: '22'
       - run: npm ci
       - run: npm test
+      - name: Text preparation and large dictionary regression
+        working-directory: .
+        run: node --test tests/test-text-preparation.mjs tests/test-pronunciation-scale.mjs
+      - name: Reproduce pinned candidate data
+        working-directory: .
+        run: |
+          curl --fail --location https://raw.githubusercontent.com/cmusphinx/cmudict/74790861f652b15e4ac49015a90074ad62a27690/cmudict.dict -o /tmp/cmudict.dict
+          python3 scripts/generate-pronunciation-candidates.py --source /tmp/cmudict.dict --output /tmp/candidates.jsonl
+          gzip -dc data/pronunciation/candidates.jsonl.gz | cmp - /tmp/candidates.jsonl
+      - name: Prepare reviewable staging release from unchanged seed
+        working-directory: .
+        run: |
+          mkdir -p build
+          node scripts/prepare-pronunciation-seed.mjs build/reviewed-seed.json
+          node cloudflare/pronunciation-api/scripts/release-v2.js build/reviewed-seed.json 1 build/staging-v2.sql > build/manifest-v2.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pronunciation-quality
+          path: |
+            data/pronunciation/*.report.json
+            build/reviewed-seed.json
+            build/staging-v2.sql
+            build/manifest-v2.json
   swift:
+    if: github.event_name != 'workflow_dispatch' || !inputs.browser_only
     runs-on: macos-26
     timeout-minutes: 25
     steps:
@@ -32,6 +71,8 @@ jobs:
       - name: SpeechCore tests
         run: swift test --package-path Packages/SpeechCore
       - name: Focused sync and offline EMA tests
+        env:
+          EMA_SIMULATOR_RUNTIME: ${{ inputs.simulator_runtime || 'iOS-26-2' }}
         run: |
           mkdir -p build
           python3 scripts/boot-sync-simulator.py 2>&1 | tee build/simulator-boot.log
@@ -40,8 +81,27 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: pronunciation-test-results
+          name: pronunciation-test-results-${{ github.run_attempt }}
           path: |
             build/Pronunciation.xcresult
             build/simulator-boot.log
             build/simulator-diagnostics.json
+
+  offline-onnx:
+    if: github.event_name == 'workflow_dispatch' && inputs.browser_only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install playwright==1.58.0
+      - run: python -m playwright install --with-deps chromium
+      - name: Real bundled ONNX, dictionary, cancellation and WAV checks
+        run: python tests/test_offline_engine.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: offline-ema-audio-${{ github.run_attempt }}
+          path: build/offline-engine/

@@ -1,0 +1,15 @@
+{
+  "candidates": 40000,
+  "active": 158,
+  "verified_new": 0,
+  "classes": {
+    "automatic": 37559,
+    "multiple_variants": 2431,
+    "turkish_collision": 10
+  },
+  "statuses": {
+    "needs_review": 39990,
+    "rejected": 10
+  },
+  "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+}

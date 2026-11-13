@@ -14,22 +14,59 @@ function literalPattern(word) {
   }).join('');
 }
 
-export function applyPronunciations(text, rules = []) {
-  if (!Array.isArray(rules) || rules.length > 512) throw new Error('Telaffuz sözlüğü sınırı aşıldı.');
-  const entries = rules.map((rule) => {
-    if (!rule || typeof rule.word !== 'string' || typeof rule.pronunciation !== 'string' ||
-        !rule.word.trim() || rule.word.length > 128 || !rule.pronunciation.trim() || rule.pronunciation.length > 256)
-      throw new Error('Geçersiz telaffuz kuralı.');
-    return { ...rule, pattern: literalPattern(rule.word.normalize('NFC')) };
-  }).sort((a, b) => b.word.length - a.word.length);
-  if (!entries.length) return text;
-  // A single replace pass: replacements never trigger another rule.
-  const pattern = new RegExp(`(?<!${WORD})(${entries.map(e => e.pattern).join('|')})(?!${WORD})(?:['’]([\\p{L}]{1,12})(?!${WORD}))?`, 'gu');
-  const exact = entries.map(e => new RegExp(`^(?:${e.pattern})$`, 'u'));
-  return text.replace(pattern, (_, word, suffix = '') => {
-    const index = exact.findIndex(re => re.test(word));
-    return entries[index].pronunciation + suffix;
+// Two character tries preserve Turkish i/ı and ASCII-brand dotted-İ semantics.
+const compiled = new WeakMap();
+const boundary = ch => ch !== undefined && /[\p{L}\p{N}_]/u.test(ch);
+const fold = (ch, tr) => /[ \t]/u.test(ch) ? ' ' :
+  (!tr && /[iIİ]/u.test(ch) ? 'i' : ch.toLocaleLowerCase('tr'));
+export function compilePronunciations(rules) {
+  if (!Array.isArray(rules) || rules.length > 100300) throw Error('Telaffuz sözlüğü sınırı aşıldı.');
+  const roots = [new Map(), new Map()];
+  rules.forEach((r, order) => {
+    if (!r || typeof r.word !== 'string' || typeof r.pronunciation !== 'string' ||
+        !r.word.trim() || r.word.length > 128 || !r.pronunciation.trim() || r.pronunciation.length > 256)
+      throw Error('Geçersiz telaffuz kuralı.');
+    const word = r.word.normalize('NFC'), tr = turkishLetters.test(word);
+    let node = roots[Number(tr)];
+    for (const ch of word) {
+      const c = fold(ch, tr);
+      if (!node.has(c)) node.set(c, new Map());
+      node = node.get(c);
+    }
+    const old = node.get(null);
+    if (!old) node.set(null, {reading:r.pronunciation, length:r.word.length, order});
   });
+  return text => {
+    const chars = [...text]; let output = '';
+    for (let i=0; i<chars.length;) {
+      let best;
+      if (!boundary(chars[i-1])) for (let mode=0; mode<2; mode++) {
+        let node=roots[mode];
+        for (let j=i; j<chars.length; j++) {
+          const c=fold(chars[j], Boolean(mode));
+          node=node.get(c); if (!node) break;
+          // A literal space in a rule accepts one or more horizontal spaces.
+          if (c===' ') while (/[ \t]/u.test(chars[j+1] ?? '') && !node.has(' ')) j++;
+          const hit=node.get(null);
+          if(hit && !boundary(chars[j+1]) && (!best || hit.length>best.length ||
+              (hit.length===best.length && hit.order<best.order))) best={...hit,end:j+1};
+        }
+      }
+      if (!best) { output+=chars[i++]; continue; }
+      let end=best.end, suffix='';
+      if (/[’']/u.test(chars[end] ?? '')) {
+        let j=end+1; while(j<chars.length && /\p{L}/u.test(chars[j])) j++;
+        if(j>end+1 && j-end-1<=12 && !boundary(chars[j])) {suffix=chars.slice(end+1,j).join('');end=j;}
+      }
+      output+=best.reading+suffix; i=end;
+    }
+    return output;
+  };
+}
+export function applyPronunciations(text, rules = []) {
+  let matcher=compiled.get(rules);
+  if(!matcher) { matcher=compilePronunciations(rules); compiled.set(rules,matcher); }
+  return matcher(text);
 }
 
 export function prepareForSpeech(input, rules = []) {

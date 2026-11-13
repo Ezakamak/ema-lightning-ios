@@ -1,7 +1,11 @@
-name: Apple API credential check
+name: Apple API check and App Store submission
 on:
   workflow_dispatch:
     inputs:
+      submit_version_1_2:
+        description: Submit existing EMA iOS 1.2 build 15 to review with manual release
+        type: boolean
+        default: false
       build_number:
         description: Optional uploaded build number to inspect (read-only)
         required: false
@@ -18,11 +22,18 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - name: Read-only Apple API and provisioning preflight
+      - name: Apple API check or explicitly requested 1.2 review submission
         env:
+          SUBMIT_APP_STORE_VERSION: ${{ inputs.submit_version_1_2 && '1.2' || '' }}
           VERIFY_BUILD_NUMBER: ${{ inputs.build_number }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: node scripts/check-apple-api.cjs
+        run: |
+          if [ "$SUBMIT_APP_STORE_VERSION" = "1.2" ]; then
+            node --check scripts/submit-app-store.cjs
+            node scripts/submit-app-store.cjs
+          else
+            node scripts/check-apple-api.cjs
+          fi
