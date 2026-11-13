@@ -1,7 +1,7 @@
 """Real bundled WASM/ONNX inference, with all non-loopback requests blocked."""
 from pathlib import Path
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
-import threading, json, base64, wave, io
+import threading, json, base64, wave, io, shutil
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,7 +21,7 @@ out = ROOT / 'build/offline-engine'
 out.mkdir(parents=True, exist_ok=True)
 try:
     with sync_playwright() as p:
-        browser = p.chromium.launch(executable_path='/usr/bin/chromium', args=['--no-sandbox'])
+        browser = p.chromium.launch(executable_path=shutil.which('chromium') or p.chromium.executable_path, args=['--no-sandbox'])
         context = browser.new_context(service_workers='block')
         external = []
         def route_handler(route):
@@ -38,8 +38,11 @@ try:
         page.goto(origin + '/index.html')
         page.wait_for_function('window.emaReady === true')
         results = []
-        for i, text in enumerate(['Merhaba dünya.', 'Saat 14:30, fiyat 125 TL. İstanbul ve Iğdır.', 'Çağrı, güzel bir öğleden sonra görüşürüz!']):
-            result = page.evaluate('text => window.synthesize(text)', text)
+        for i, text in enumerate(['Merhaba dünya.', 'Saat 14:30, fiyat 125 TL. İstanbul ve Iğdır.', 'Çağrı, güzel bir öğleden sonra görüşürüz!', "iPhone’um ve Google Drive."]):
+            rules = json.loads((ASSETS / 'pronunciations.json').read_text()) if i == 3 else []
+            result = page.evaluate('arg => window.synthesize(arg.text, crypto.randomUUID(), {pronunciations: arg.rules})', {'text': text, 'rules': rules})
+            if i == 3:
+                assert 'ayfon' in result['normalized'] and 'gugıl' in result['normalized'], result['normalized']
             audio = base64.b64decode(result.pop('wav'))
             with wave.open(io.BytesIO(audio)) as wav:
                 assert wav.getframerate() == 48000 and wav.getnchannels() == 1
