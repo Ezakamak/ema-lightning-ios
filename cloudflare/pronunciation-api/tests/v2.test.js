@@ -9,7 +9,7 @@ test('v2 staging, atomic publication, immutable chunks, rollback, v1 preservatio
  const mf=new Miniflare({modules:true,modulesRules:[{type:'ESModule',include:['**/*.js']}],scriptPath:'src/index.js',compatibilityDate:'2026-08-06',d1Databases:['DB']});
  try {
  const db=await mf.getD1Database('DB');
- for(const file of ['0001_dictionary.sql','0002_shards.sql']) await db.exec(readFileSync('migrations/'+file,'utf8').replace(/\n/g,' '));
+ for(const file of ['0001_dictionary.sql','0002_shards.sql']) await db.exec(readFileSync('migrations/'+file,'utf8').replace(/--[^\n]*/g,'').replace(/\n/g,' '));
  const req=p=>mf.dispatchFetch('https://speak.ekatech.net/api/v2/pronunciations/'+p);
  const first=await releaseV2(approved(seeds),1);
  for(const line of first.sql.split('\n')) await db.exec(line);

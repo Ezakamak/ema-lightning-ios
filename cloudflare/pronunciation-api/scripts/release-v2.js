@@ -15,8 +15,11 @@ export async function releaseV2(records, version) {
  // Stable hash buckets avoid shifting every subsequent chunk when a word is added.
  const buckets=new Map();
  for(const r of rules) {const bucket=hash(key(r.word)).slice(0,2); if(!buckets.has(bucket)) buckets.set(bucket,[]); buckets.get(bucket).push(r);}
- const chunks=[...buckets].sort().map(([,rs])=>{const payload=JSON.stringify(rs); if(Buffer.byteLength(payload)>262144) throw Error('Chunk overflow'); return {hash:hash(payload),bytes:Buffer.byteLength(payload),ruleCount:rs.length,payload};});
+ const groups=[];
+ for(const [,rs] of [...buckets].sort()) { let group=[]; for(const r of rs) {if(Buffer.byteLength(JSON.stringify([...group,r]))>48000) {groups.push(group); group=[];} group.push(r);} if(group.length) groups.push(group); }
+ const chunks=groups.map(rs=>{const payload=JSON.stringify(rs); if(Buffer.byteLength(payload)>262144) throw Error('Chunk overflow'); return {hash:hash(payload),bytes:Buffer.byteLength(payload),ruleCount:rs.length,payload};});
  const manifest={schemaVersion:2,version,locale:'tr-TR',ruleCount:rules.length,checksum:await checksum(rules),chunks:chunks.map(({payload,...c})=>c)};
+ if(Buffer.byteLength(JSON.stringify(manifest))>262144 || chunks.length>1024 || chunks.reduce((n,c)=>n+c.bytes,0)>32000000) throw Error('Release exceeds mobile budget');
  const statements=chunks.map(c=>`INSERT OR IGNORE INTO dictionary_chunks(hash,payload) VALUES(${quote(c.hash)},${quote(c.payload)});`);
  statements.push(`INSERT INTO dictionary_releases(version,manifest) VALUES(${version},${quote(JSON.stringify(manifest))});`);
  // Only staging is promoted by the generator. Execute promotion separately after review.

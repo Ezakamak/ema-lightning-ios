@@ -138,7 +138,7 @@ final class EMASpeechEngine: NSObject, SpeechEngine, WKNavigationDelegate, AVAud
         let traceID = diagnosticID ?? diagnostics.begin(engine: displayName, input: request.text)
         diagnostics.protect(request.text)
         for value in pronunciations.privateValues { diagnostics.protect(value) }
-        let speechLexicon = pronunciations.effectiveRules.map { ["word": $0.word, "pronunciation": $0.pronunciation] }
+        let speechLexicon = pronunciations.rulesForSpeech(request.text).map { ["word": $0.word, "pronunciation": $0.pronunciation] }
         let op = Operation(diagnosticID: traceID)
         active = op
         let operationID = op.id
