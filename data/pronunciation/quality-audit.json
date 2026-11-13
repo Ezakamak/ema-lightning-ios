@@ -1,0 +1,27 @@
+{
+  "scope": "40000 quarantined candidates; identical readings are review hints, not proof of aliases",
+  "duplicate_words": 0,
+  "duplicate_phonetic_variants": 0,
+  "identical_suggestion_groups": 3002,
+  "records_in_identical_suggestion_groups": 7162,
+  "auditory_reviewed_new": 0,
+  "known_intentional_seed_aliases": [
+    [
+      "Wi-Fi",
+      "WiFi"
+    ],
+    [
+      "ChatGPT",
+      "Chat GPT"
+    ],
+    [
+      "Disney+",
+      "Disney Plus"
+    ],
+    [
+      "email",
+      "e-mail"
+    ]
+  ],
+  "policy": "Keep intentional spelling aliases; never merge homophones automatically."
+}

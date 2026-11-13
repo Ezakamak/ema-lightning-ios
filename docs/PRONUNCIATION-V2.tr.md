@@ -135,3 +135,46 @@ repoya kopyalanmadı; lisansları telaffuz verisi yeniden dağıtım izni olarak
 
 Bağlam çözümlemesi olmayan bu sürümde yeni çok anlamlı/çok okunuşlu kayıtları otomatik
 etkinleştirmek yerine tüm varyantları inceleme havuzunda tutmak kaliteyi koruyan karardır.
+
+## Tamamlanan Actions doğrulaması
+
+Uygulama/Worker/veri kodu `136287f` sonrasında değişmedi; sonraki commit'ler test,
+runner ve rapor düzenlemeleridir. Kontroller cloud workspace'te çalıştırılmadı.
+
+| Kontrol | Sonuç | Bağlantı |
+|---|---|---|
+| Worker/D1 v1+v2 | 13 test geçti; staging, eksik yayın, immutable parça ve monoton rollback | https://github.com/Ezakamak/ema-lightning-ios/actions/runs/43376239393/job/131723464078 |
+| JS seed/ölçek + aday tekrar üretimi | 3 test ve 40.000 aday byte karşılaştırması geçti | Aynı Worker işi |
+| SpeechCore | 14 test geçti | https://github.com/Ezakamak/ema-lightning-ios/actions/runs/43378749462 |
+| iOS 26.2 senkronizasyon + gerçek EMA | 10 test geçti; v2 cache/rollback/bozuk parça ve sentez sırasında güncelleme dahil | Aynı iOS çalıştırması |
+| Gerçek Chromium WASM/ONNX | 4 WAV, Türkçe normalizasyon, sözlük, iptal ve hata sonrası toparlanma geçti; dış ağ engelli | https://github.com/Ezakamak/ema-lightning-ios/actions/runs/43378800066 |
+| Unsigned iOS IPA | Derleme, paketleme, asset integrity kontrolleri geçti | https://github.com/Ezakamak/ema-lightning-ios/actions/runs/43376239415 |
+
+İlk iOS 26.5 denemeleri simulator Data Migration açılışında 300 saniye sınırına takıldı.
+26.2 kurulu runtime ile son çalışma geçti. Bir ara çalışma workflow concurrency nedeniyle
+iptal edildi; browser ve Swift grupları ayrıldı. `ubuntu-latest` 26.04'e geçtiğinden,
+Playwright işi desteklenen standart `ubuntu-24.04` runner'ına sabitlendi. Geçen Worker/IPA
+kontrolleri bu CI düzeltmeleri için yeniden çalıştırılmadı.
+
+Ölçümler sentetik ve runner'a özgüdür:
+
+- Node 100.000 kural: trie kurma 417 ms; 100 kısa eşleştirme toplam 2,08 ms;
+  toplam Node süreç RSS'i 127.438.848 byte (yalnız trie belleği değildir).
+- Swift debug/macOS runner 40.000 kural: indeks kurma 0,983 s; 100 sorgu toplam 3,39 ms.
+- 100.000 kurallık yayın hazırlama 2,753 s; manifest 27.292 byte; en büyük test parçası 30.565 byte.
+- ONNX örneği: `iPhone’um ve Google Drive.` → `ayfonum ve gugıl drayv.`;
+  48 kHz mono, 67.200 örnek, RMS 0,05414. Bu akustik ölçüm doğruluk puanı değildir.
+
+[WAV artefaktı](https://github.com/Ezakamak/ema-lightning-ios/actions/runs/43378800066/artifacts/14015561853)
+ve [iOS xcresult](https://github.com/Ezakamak/ema-lightning-ios/actions/runs/43378749462/artifacts/14016585076)
+incelemeye hazırdır. Ses örnekleri için gerçek işitsel değerlendirme yapılmadı.
+
+`quality-audit.json`: 40.000 adayda yinelenen sözcük/fonetik varyant **0**; aynı öneri
+metnine sahip 3.002 grupta 7.162 kayıt bulunur. Aynı okunuş aynı kelime/alias kanıtı değildir;
+bunlar otomatik birleştirilmez. Başlangıç sözlüğündeki Wi-Fi/WiFi, ChatGPT/Chat GPT,
+Disney+/Disney Plus ve email/e-mail gibi kasıtlı yazım alias'ları korunur.
+
+Yeni doğrulanmış büyük sözlük hedefi henüz tamamlanmış değildir: **etkin 158**, yeni adaylardan
+etkinleşen **0**. Teslim edilenler gerçek kod, büyük inceleme havuzu, test edilmiş v2 altyapısı
+ve iOS entegrasyonudur. İnsan incelemesi, daha güçlü çok dilli fonetik/bağlam modeli,
+gerçek cihaz RAM/pil ölçümü ve uzak staging/üretim dağıtımı sonraki işlerdir.
