@@ -60,15 +60,15 @@ async function main(){
  const submissions=await list('/v1/apps/'+app.id+'/reviewSubmissions');
  let submission;
  for(const s of submissions.filter(s=>s.attributes.platform==='IOS'&&s.attributes.state==='READY_FOR_REVIEW')){
-  const items=await list('/v1/reviewSubmissions/'+s.id+'/items');
+  const items=await list('/v1/reviewSubmissions/'+s.id+'/items?include=appStoreVersion');
   const target=items.some(i=>i.relationships?.appStoreVersion?.data?.id===version.id);
   if(target&&items.length!==1)throw Error('Draft contains other review items; leaving it unchanged');
   if(target||items.length===0){submission=s;break;}
  }
  if(!submission)submission=(await call('POST','/v1/reviewSubmissions',{data:{type:'reviewSubmissions',attributes:{platform:'IOS'},relationships:{app:rel('apps',app.id)}}})).data;
- let items=await list('/v1/reviewSubmissions/'+submission.id+'/items');
+ let items=await list('/v1/reviewSubmissions/'+submission.id+'/items?include=appStoreVersion');
  if(items.length===0)await call('POST','/v1/reviewSubmissionItems',{data:{type:'reviewSubmissionItems',relationships:{reviewSubmission:rel('reviewSubmissions',submission.id),appStoreVersion:rel('appStoreVersions',version.id)}}});
- items=await list('/v1/reviewSubmissions/'+submission.id+'/items');
+ items=await list('/v1/reviewSubmissions/'+submission.id+'/items?include=appStoreVersion');
  if(items.length!==1||items[0].relationships?.appStoreVersion?.data?.id!==version.id)throw Error('Unexpected review items; not submitting');
  await call('PATCH','/v1/reviewSubmissions/'+submission.id,{data:{type:'reviewSubmissions',id:submission.id,attributes:{submitted:true}}});
  const final=(await call('GET','/v1/reviewSubmissions/'+submission.id)).data;
