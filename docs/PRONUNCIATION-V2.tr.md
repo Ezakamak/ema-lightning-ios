@@ -107,3 +107,31 @@ Worker/D1 atomik staging/rollback, 100k yayın bütçesi, tüm seed'ler, büyük
 veri tekrar üretimi, Swift Store ve v2 kesinti/bozuk parça/önceki cache testleri bulunur.
 Mevcut gerçek EMA ONNX testi çalışırken güncelleme ve sonraki offline isteği denetler.
 Son Actions sonuçları ve ölçümler PR açıklamasına/son rapora eklenecek.
+
+### Fonetik kararların dayanakları
+
+CMU'nun [phoneset araçları](https://github.com/cmusphinx/cmudict-tools) fonem ve vurgu
+bilgisini ayırır; tek bir IPA harfi, Türkçe motorun aynı sesi üreteceği anlamına gelmez.
+[Inkelas ve Orgun'un Türkçe vurgu çalışması](https://linguistics.berkeley.edu/~inkelas/Papers/InkelasOrgunStress.pdf)
+ve [özel ad fonolojisi incelemesi](https://doi.org/10.1111/lnc3.12502), yer adları ve alıntılarda
+varsayılan son hece vurgusuna güvenilemeyeceğini destekler. Bu nedenle 0/1/2 kaynak
+vurgusunu saklamak, Türkçe önerinin vurgusunun doğru olduğunu iddia etmekten ayrıdır.
+
+[Turkish onset clusters çalışması](https://escholarship.org/uc/item/1xn6m49b), duyulan ara
+ünlülerin her zaman kategorik fonolojik ekleme sayılmaması gerektiğini tartışır.
+[Başlangıç ünsüz kümeleri araştırması](https://dergipark.org.tr/en/pub/ijesacademic/article/773329)
+ise Türkçe konuşurların ek ünlü kullanmasını inceler. Bu araştırmalar otomatik bir
+“her iki ünsüz arasına ı koy” kuralını haklı çıkarmaz. Çalışmaların metin/verisi bu
+repoya kopyalanmadı; lisansları telaffuz verisi yeniden dağıtım izni olarak varsayılmadı.
+
+| Durum | Otomatik dönüşüm riski | Yayın kararı |
+|---|---|---|
+| AH0 /ə/, ER /ɝ/ | `ı`/`ır` yaklaşık olabilir; Türkçe ünlü ve hece kalitesi farklıdır. | Öneri + fonem uyarısı, dinleme gerekli. |
+| AE /æ/, TH /θ/, DH /ð/, W /w/ | Kaynak ses Türkçe envanterinde birebir yoktur; yerleşik okunuş değişebilir. | Otomatik doğrulama yok. |
+| AW/AY/EY/OW | Yazılan iki ünlü/kayma EMA'da farklı hecelenebilir. | Kaynak fonem korunur, Türkçe çıktı ayrı incelenir. |
+| Ünsüz kümeleri, NG | Hece yapısı, burunsu ses ve araya ünlü girme davranışı harf tablosuyla belirlenemez. | Kör ekleme/silme uygulanmaz. |
+| `model`, `program` gibi ortak yazımlar | İngilizce ses kaydı doğru olsa bile Türkçe cümlede yanlış seçilebilir. | Bilinen çakışmalar reddedilir; diğerleri de incelemesiz yayınlanmaz. |
+| Kısaltmalar, kişi/yer adları | İngilizce sözlük varyantı Türkçedeki kullanım veya harf adları için yeterli kanıt değildir. | Yerleşik Türkçe kullanım kanıtı gerekir. |
+
+Bağlam çözümlemesi olmayan bu sürümde yeni çok anlamlı/çok okunuşlu kayıtları otomatik
+etkinleştirmek yerine tüm varyantları inceleme havuzunda tutmak kaliteyi koruyan karardır.

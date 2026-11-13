@@ -2,6 +2,15 @@ name: Pronunciation dictionary checks
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      swift_only:
+        description: Run only Swift and real EMA checks (reuse unchanged Worker results)
+        type: boolean
+        default: false
+      simulator_runtime:
+        description: Installed iOS runtime identifier
+        type: string
+        default: iOS-26-2
 concurrency:
   group: pronunciation-${{ github.ref }}
   cancel-in-progress: true
@@ -9,6 +18,7 @@ permissions:
   contents: read
 jobs:
   worker:
+    if: github.event_name != 'workflow_dispatch' || !inputs.swift_only
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -56,6 +66,8 @@ jobs:
       - name: SpeechCore tests
         run: swift test --package-path Packages/SpeechCore
       - name: Focused sync and offline EMA tests
+        env:
+          EMA_SIMULATOR_RUNTIME: ${{ inputs.simulator_runtime || 'iOS-26-2' }}
         run: |
           mkdir -p build
           python3 scripts/boot-sync-simulator.py 2>&1 | tee build/simulator-boot.log
@@ -64,7 +76,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: pronunciation-test-results
+          name: pronunciation-test-results-${{ github.run_attempt }}
           path: |
             build/Pronunciation.xcresult
             build/simulator-boot.log

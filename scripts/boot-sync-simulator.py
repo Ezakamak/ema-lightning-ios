@@ -1,5 +1,6 @@
-"""Start the newest available iOS simulator; retain bounded CI boot diagnostics."""
+"""Start an explicitly selected available iOS simulator; retain bounded CI boot diagnostics."""
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -15,7 +16,11 @@ try:
     devices = json.loads(listing)['devices']
     runtimes = sorted((k for k in devices if '.iOS-' in k),
                       key=lambda k: tuple(map(int, k.split('.iOS-')[1].split('-'))), reverse=True)
-    runtime, device = next((r, d) for r in runtimes for d in devices[r] if 'iPhone' in d['name'])
+    requested = os.environ.get('EMA_SIMULATOR_RUNTIME', 'iOS-26-2')
+    selected = [r for r in runtimes if r.endswith('.' + requested)]
+    if not selected:
+        raise RuntimeError(f'Requested simulator {requested} unavailable; available: {runtimes}')
+    runtime, device = next((r, d) for r in selected for d in devices[r] if 'iPhone' in d['name'])
     identifier = device['udid']
     print(f"Selected {runtime}: {device['name']} ({identifier})", flush=True)
     # A visible Simulator process also initializes the GUI services used by SpringBoard.
