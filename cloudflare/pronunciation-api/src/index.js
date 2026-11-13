@@ -1,14 +1,16 @@
+import {serveV2} from './v2.js';
 import {MAX_BYTES} from './dictionary.js';
 function json(body,status=200,extra={}) {return new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...extra}});}
 export default {async fetch(request,env,ctx) {
  const url=new URL(request.url),path=url.pathname;
  if(!['GET','HEAD','OPTIONS'].includes(request.method)) return json({error:'method_not_allowed'},405,{Allow:'GET, HEAD, OPTIONS'});
  if(url.search||Number(request.headers.get('content-length')||0)>0) return json({error:'unexpected_payload'},400);
- if(!['/api/v1/health','/api/v1/pronunciations','/api/v1/pronunciations/version'].includes(path)) return json({error:'not_found'},404);
+ if(!path.startsWith('/api/v2/pronunciations/')&&!['/api/v1/health','/api/v1/pronunciations','/api/v1/pronunciations/version'].includes(path)) return json({error:'not_found'},404);
  if(request.headers.get('origin')&&request.headers.get('origin')!=='https://speak.ekatech.net') return json({error:'origin_not_allowed'},403);
  const headers={'Access-Control-Allow-Origin':'https://speak.ekatech.net','Access-Control-Expose-Headers':'ETag','Cache-Control':'public, max-age=300','Vary':'Origin'};
  if(request.method==='OPTIONS') return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, HEAD, OPTIONS','Access-Control-Allow-Headers':'If-None-Match'}});
  if(env.RATE_LIMITER&&!(await env.RATE_LIMITER.limit({key:request.headers.get('cf-connecting-ip')||'unknown'})).success) return json({error:'rate_limited'},429,{'Retry-After':'60'});
+ if(path.startsWith('/api/v2/pronunciations/')) return serveV2(request,env);
  if(path==='/api/v1/health') return request.method==='HEAD'?new Response(null,{headers}):json({status:'ok'},200,headers);
  try {
   const cache=globalThis.caches?.default,cacheKey=new Request(url.origin+path);

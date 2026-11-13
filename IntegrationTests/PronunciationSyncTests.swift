@@ -30,7 +30,7 @@ final class PronunciationSyncTests: XCTestCase {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 15; config.timeoutIntervalForResource = 30
         config.protocolClasses = [DictionaryURLProtocol.self]
-        return PronunciationSyncService(session: URLSession(configuration: config), directory: directory, defaults: defaults)
+        return PronunciationSyncService(session: URLSession(configuration: config), directory: directory, defaults: defaults, enableV2: false)
     }
     private func setup() -> (URL, UserDefaults) {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)

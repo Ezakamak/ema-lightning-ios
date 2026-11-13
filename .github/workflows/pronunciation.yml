@@ -20,6 +20,20 @@ jobs:
           node-version: '22'
       - run: npm ci
       - run: npm test
+      - name: Text preparation and large dictionary regression
+        working-directory: .
+        run: node --test tests/test-text-preparation.mjs tests/test-pronunciation-scale.mjs
+      - name: Reproduce pinned candidate data
+        working-directory: .
+        run: |
+          curl --fail --location https://raw.githubusercontent.com/cmusphinx/cmudict/74790861f652b15e4ac49015a90074ad62a27690/cmudict.dict -o /tmp/cmudict.dict
+          python3 scripts/generate-pronunciation-candidates.py --source /tmp/cmudict.dict --output /tmp/candidates.jsonl
+          gzip -dc data/pronunciation/candidates.jsonl.gz | cmp - /tmp/candidates.jsonl
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pronunciation-quality
+          path: data/pronunciation/*.report.json
   swift:
     runs-on: macos-26
     timeout-minutes: 25

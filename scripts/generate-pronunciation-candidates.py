@@ -58,27 +58,31 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default="build/ema-pronunciation-candidates.jsonl")
     parser.add_argument("--limit", type=int, default=40000)
+    parser.add_argument("--source", required=True, help="Pinned cmudict.dict file")
     args = parser.parse_args()
     if not (1 <= args.limit <= 100000):
         parser.error("--limit must be between 1 and 100000")
-    try:
-        import cmudict
-        from spacy.lang.en.stop_words import STOP_WORDS as english_stop
-        from spacy.lang.tr.stop_words import STOP_WORDS as turkish_stop
-    except ImportError:
-        parser.error("research-only deps missing: pip install cmudict spacy")
+    parser_input = Path(args.source)
+    variants_by_word = {}
+    for line in parser_input.read_text(encoding="utf-8").splitlines():
+        if not line or line.startswith(";;;"): continue
+        fields = line.split("#", 1)[0].split()
+        if len(fields)<2: continue
+        word = re.sub(r"\(\d+\)$", "", fields[0])
+        variants_by_word.setdefault(word, []).append(fields[1:])
+    english_stop = {"there", "their", "these", "those", "which", "where", "would", "could", "should"}
+    turkish_stop = {"bir", "bu", "ve", "ile", "ama", "ben", "sen", "son", "can", "sonra"}
     root = Path(__file__).resolve().parents[1]
     existing = json.loads((root / "App/Resources/EMA/pronunciations.json").read_text(encoding="utf-8"))
     old = {unicodedata.normalize("NFC", r["word"]).casefold() for r in existing}
+    source_hash = __import__("hashlib").sha256(parser_input.read_bytes()).hexdigest()
     items = []
-    for word, variants in cmudict.dict().items():
+    for word, variants in variants_by_word.items():
         word = word.lower()
         if not re.fullmatch(r"[a-z]{5,15}", word):
             continue
-        if word in old or word in english_stop or word in turkish_stop or word in TURKISH_COLLISIONS:
-            continue
-        if len({tuple(x) for x in variants}) != 1:
-            continue
+        if word in old: continue
+        collision = word in english_stop or word in turkish_stop or word in TURKISH_COLLISIONS
         reading, warnings = approximate(variants[0])
         if not reading or not re.fullmatch(r"[a-zçğıöşü]+", reading):
             continue
@@ -91,7 +95,16 @@ def main():
             "source_arpabet": " ".join(variants[0]),
             "category_candidate": "Teknik terim" if tech else "İngilizce",
             "uncertain_phonemes": warnings,
-            "status": "UNVERIFIED_DO_NOT_IMPORT",
+            "status": "rejected" if collision else "needs_review",
+            "quality_class": "turkish_collision" if collision else ("multiple_variants" if len(variants)>1 else "automatic"),
+            "confidence": max(0.1, 0.75 - len(warnings)*0.06 - (0.25 if collision else 0) - (0.15 if len(variants)>1 else 0)),
+            "source_language": "en",
+            "stress": [[p for p in v if p[-1:].isdigit()] for v in variants],
+            "alternatives": [{"arpabet": " ".join(v), "suggestion": approximate(v)[0]} for v in variants],
+            "source_revision": "74790861f652b15e4ac49015a90074ad62a27690",
+            "source_sha256": source_hash,
+            "license": "CMU-BSD-like; see CMUDICT-LICENSE",
+            "warnings": ["English presence does not establish Turkish usage", "No auditory review", "Stress not encoded in EMA text"],
             "source": "Carnegie Mellon Pronouncing Dictionary",
             "source_url": "https://github.com/cmusphinx/cmudict",
         })
@@ -107,6 +120,11 @@ def main():
     with output.open("w", encoding="utf-8") as stream:
         for item in items:
             stream.write(json.dumps(item, ensure_ascii=False, sort_keys=True)+"\n")
+    from collections import Counter
+    report = {"candidates": len(items), "active": len(existing), "verified_new": 0,
+              "classes": dict(Counter(i["quality_class"] for i in items)),
+              "statuses": dict(Counter(i["status"] for i in items)), "source_sha256": source_hash}
+    output.with_suffix(".report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2)+"\n")
     print(f"Wrote {len(items)} unverified candidates: {output}")
     print("NOT published. Review phonetics, actual Turkish usage, collisions and EMA audio first.")
 

@@ -14,8 +14,8 @@ struct CentralDictionary: Codable {
     let rules: [PronunciationRule]
 
     func validate() throws {
-        guard version > 0, schemaVersion == 1, locale == "tr-TR", ruleCount > 0,
-              ruleCount <= 5000, rules.count == ruleCount,
+        guard version > 0, (schemaVersion == 1 || schemaVersion == 2), locale == "tr-TR", ruleCount > 0,
+              ruleCount <= (schemaVersion == 2 ? 100000 : 5000), rules.count == ruleCount,
               Set(rules.map(\.id)).count == ruleCount,
               ISO8601DateFormatter().date(from: updatedAt) != nil else { throw SyncFailure.invalid }
         for rule in rules {
@@ -47,18 +47,20 @@ final class PronunciationSyncService: ObservableObject {
     private var nextAttempt: Date
     private var failures: Int
     private var etag: String?
+    private let enableV2: Bool
     private let maxBytes = 1_048_576
     private var file: URL { directory.appendingPathComponent("central-v1.json") }
 
     init(session: URLSession? = nil, directory: URL? = nil, defaults: UserDefaults = .standard,
          baseURL: URL = URL(string: "https://speak.ekatech.net/api/v1/pronunciations")!,
-         now: @escaping () -> Date = Date.init) {
+         enableV2: Bool = true, now: @escaping () -> Date = Date.init) {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 15
         config.timeoutIntervalForResource = 30
         config.httpCookieStorage = nil
         config.urlCache = nil
         config.waitsForConnectivity = false
+        self.enableV2 = enableV2
         self.session = session ?? URLSession(configuration: config)
         self.directory = directory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Pronunciations", isDirectory: true)
         self.defaults = defaults; self.baseURL = baseURL; self.now = now
@@ -80,6 +82,16 @@ final class PronunciationSyncService: ObservableObject {
         checking = true; message = "Güncelleme kontrol ediliyor…"
         defer { checking = false }
         do {
+            if enableV2, dictionary?.schemaVersion != 2,
+               let cached = await V2DictionaryCache.load(directory: directory) { dictionary = cached }
+            if enableV2 {
+                let root = baseURL.deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("v2/pronunciations")
+                if let snapshot = try await V2DictionaryCache.update(session: session, root: root, directory: directory) {
+                    dictionary = snapshot
+                    succeeded(updated: true); return
+                }
+            }
+            if dictionary?.schemaVersion == 2 { throw SyncFailure.response }
             var request = URLRequest(url: baseURL.appendingPathComponent("version"))
             if dictionary != nil, let etag { request.setValue(etag, forHTTPHeaderField: "If-None-Match") }
             let (data, response) = try await fetch(request)
@@ -162,5 +174,94 @@ final class PronunciationSyncService: ObservableObject {
         defaults.set(0, forKey: "pronunciation.syncFailures")
         defaults.set(etag, forKey: "pronunciation.versionETag")
         message = updated ? "Yeni telaffuz kuralları indirildi." : "Türkçe telaffuz sözlüğü güncel."
+    }
+}
+
+// Disk work, hashing, parsing and validation run outside the main actor.
+private enum V2DictionaryCache {
+    struct Chunk: Codable { let hash: String; let bytes: Int; let ruleCount: Int }
+    struct Manifest: Codable {
+        let schemaVersion: Int; let version: Int; let locale: String
+        let ruleCount: Int; let checksum: String; let chunks: [Chunk]
+    }
+    static func sha(_ data: Data) -> String { SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined() }
+    static func load(directory: URL) async -> CentralDictionary? {
+        for name in ["active-v2.json", "previous-v2.json"] {
+            if let value = read(directory.appendingPathComponent(name)) { return value }
+        }
+        return nil
+    }
+    static func read(_ url: URL) -> CentralDictionary? {
+        guard let size = try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize, size <= 48_000_000,
+              let data = try? Data(contentsOf: url), let value = try? JSONDecoder().decode(CentralDictionary.self, from: data),
+              value.schemaVersion == 2, (try? value.validate()) != nil else { return nil }
+        return value
+    }
+    static func fetch(_ url: URL, session: URLSession, etag: String? = nil) async throws -> (Data, HTTPURLResponse) {
+        var request = URLRequest(url: url)
+        if let etag { request.setValue(etag, forHTTPHeaderField: "If-None-Match") }
+        let (stream, response) = try await session.bytes(for: request)
+        guard let http = response as? HTTPURLResponse, http.url == url,
+              http.expectedContentLength <= 262144 else { throw SyncFailure.response }
+        var data = Data()
+        for try await byte in stream {
+            guard data.count < 262144 else { throw SyncFailure.invalid }
+            data.append(byte)
+        }
+        return (data, http)
+    }
+    static func update(session: URLSession, root: URL, directory: URL) async throws -> CentralDictionary? {
+        let active = await load(directory: directory)
+        let tagURL = directory.appendingPathComponent("manifest-etag")
+        let tag = active == nil ? nil : try? String(contentsOf: tagURL, encoding: .utf8)
+        let (data, response) = try await fetch(root.appendingPathComponent("manifest"), session: session, etag: tag)
+        if response.statusCode == 404 || response.statusCode == 503 { return nil }
+        if response.statusCode == 304 { guard let active else { throw SyncFailure.invalid }; return active }
+        guard response.statusCode == 200 else { throw SyncFailure.response }
+        let m = try JSONDecoder().decode(Manifest.self, from: data)
+        guard m.schemaVersion == 2, m.locale == "tr-TR", m.version > 0,
+              m.ruleCount > 0, m.ruleCount <= 100000, !m.chunks.isEmpty, m.chunks.count <= 1024,
+              Set(m.chunks.map(\.hash)).count == m.chunks.count,
+              m.chunks.reduce(0, { $0 + max(0, min(100001, $1.ruleCount)) }) == m.ruleCount else { throw SyncFailure.invalid }
+        // Rollback is published as a higher version with previously reviewed contents.
+        if let active {
+            guard m.version >= active.version else { throw SyncFailure.invalid }
+            if m.version == active.version {
+                guard m.checksum == active.checksum, m.ruleCount == active.ruleCount else { throw SyncFailure.invalid }
+                return active
+            }
+        }
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        var rules = [PronunciationRule]()
+        rules.reserveCapacity(m.ruleCount)
+        for c in m.chunks {
+            guard c.hash.count == 64, c.hash.allSatisfy({ "0123456789abcdef".contains($0) }),
+                  c.bytes > 0, c.bytes <= 262144, c.ruleCount > 0 else { throw SyncFailure.invalid }
+            let file = directory.appendingPathComponent(c.hash + ".json")
+            var bytes = (try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize) == c.bytes ? try? Data(contentsOf: file) : nil
+            if bytes.map({ sha($0) != c.hash }) ?? true {
+                let (download, http) = try await fetch(root.appendingPathComponent("chunks/" + c.hash), session: session)
+                guard http.statusCode == 200, download.count == c.bytes, sha(download) == c.hash else { throw SyncFailure.invalid }
+                bytes = download
+                try download.write(to: file, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+            }
+            guard let bytes else { throw SyncFailure.invalid }
+            let chunk = try JSONDecoder().decode([PronunciationRule].self, from: bytes)
+            guard chunk.count == c.ruleCount else { throw SyncFailure.invalid }
+            rules.append(contentsOf: chunk)
+        }
+        let value = CentralDictionary(version: m.version, schemaVersion: 2, locale: m.locale, ruleCount: m.ruleCount,
+            updatedAt: "2026-11-13T00:00:00Z", checksum: m.checksum, rules: rules)
+        try value.validate()
+        let file = directory.appendingPathComponent("active-v2.json")
+        if let active { try JSONEncoder().encode(active).write(to: directory.appendingPathComponent("previous-v2.json"), options: .atomic) }
+        try JSONEncoder().encode(value).write(to: file, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+        if let etag = response.value(forHTTPHeaderField: "ETag") { try? Data(etag.utf8).write(to: tagURL, options: .atomic) }
+        // Prune abandoned downloads only after the replacement and backup are durable.
+        let keep = Set(m.chunks.map { $0.hash + ".json" })
+        for url in (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? [] {
+            if url.lastPathComponent.count == 69, !keep.contains(url.lastPathComponent) { try? FileManager.default.removeItem(at: url) }
+        }
+        return value
     }
 }
