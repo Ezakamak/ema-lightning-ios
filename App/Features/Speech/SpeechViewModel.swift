@@ -12,7 +12,7 @@ enum EngineChoice: String, CaseIterable, Identifiable {
 @MainActor
 final class SpeechViewModel: ObservableObject {
     static let exampleText = "Merhaba! Bugün güzel bir fikri sese dönüştürmek için harika bir gün."
-    @Published var text = SpeechViewModel.exampleText
+    @Published var text = ""
     @Published var choice: EngineChoice = .ema { didSet { stop() } }
     @Published var errorMessage: String?
     @Published private(set) var isGenerating = false
@@ -26,7 +26,7 @@ final class SpeechViewModel: ObservableObject {
     private let injectedAction: ((SpeechRequest, UUID) async throws -> Void)?
 
     init(fault: EMATestFault = .none, timing: EMATiming = EMATiming(),
-         library: RecordingStore? = nil, action: ((SpeechRequest, UUID) async throws -> Void)? = nil) {
+         defaults: UserDefaults = .standard, library: RecordingStore? = nil, action: ((SpeechRequest, UUID) async throws -> Void)? = nil) {
         let diagnostics = EMADiagnostics()
         self.diagnostics = diagnostics
         self.library = library ?? RecordingStore()
@@ -34,6 +34,11 @@ final class SpeechViewModel: ObservableObject {
         self.pronunciations = pronunciations
         ema = EMASpeechEngine(diagnostics: diagnostics, timing: timing, fault: fault, pronunciations: pronunciations)
         injectedAction = action
+        let exampleShownKey = "speech.hasShownInitialExample.v1"
+        if !defaults.bool(forKey: exampleShownKey) {
+            text = Self.exampleText
+            defaults.set(true, forKey: exampleShownKey)
+        }
     }
 
     func speak() {
