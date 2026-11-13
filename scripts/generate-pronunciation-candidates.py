@@ -3,9 +3,9 @@
 """Generate UNVERIFIED English-to-Turkish pronunciation candidates for human review.
 
 Never feed this output directly to a live D1 dictionary, IPA, or v1 importer.
-Dependencies (research-only): python -m pip install cmudict spacy
+Dependencies: Python 3 standard library; --source must be the pinned CMU dictionary.
 Source: CMU Pronouncing Dictionary, Carnegie Mellon University.
-https://github.com/cmusphinx/cmudict (CMU data can be used commercially; credit requested)
+https://github.com/cmusphinx/cmudict (retain the full CMU redistribution notice)
 """
 import argparse
 import difflib
@@ -76,6 +76,8 @@ def main():
     existing = json.loads((root / "App/Resources/EMA/pronunciations.json").read_text(encoding="utf-8"))
     old = {unicodedata.normalize("NFC", r["word"]).casefold() for r in existing}
     source_hash = __import__("hashlib").sha256(parser_input.read_bytes()).hexdigest()
+    if source_hash != "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22":
+        parser.error("Source checksum does not match the licensed pinned revision")
     items = []
     for word, variants in variants_by_word.items():
         word = word.lower()

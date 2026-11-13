@@ -75,6 +75,12 @@ final class PronunciationSyncService: ObservableObject {
             // Corrupt cache must trigger a fresh full download even after a recent successful check.
             if failures == 0 { nextAttempt = .distantPast }
         }
+        if enableV2 {
+            Task { [weak self] in
+                guard let self, let cached = await V2DictionaryCache.load(directory: self.directory) else { return }
+                if self.dictionary?.schemaVersion != 2 { self.dictionary = cached }
+            }
+        }
     }
 
     func check(force: Bool = false) async {
@@ -213,7 +219,9 @@ private enum V2DictionaryCache {
     static func update(session: URLSession, root: URL, directory: URL) async throws -> CentralDictionary? {
         let active = await load(directory: directory)
         let tagURL = directory.appendingPathComponent("manifest-etag")
-        let tag = active == nil ? nil : try? String(contentsOf: tagURL, encoding: .utf8)
+        let savedTag = (try? String(contentsOf: tagURL, encoding: .utf8)) ?? ""
+        let prefix = "v\(active?.version ?? 0):"
+        let tag = active != nil && savedTag.hasPrefix(prefix) ? String(savedTag.dropFirst(prefix.count)) : nil
         let (data, response) = try await fetch(root.appendingPathComponent("manifest"), session: session, etag: tag)
         if response.statusCode == 404 || response.statusCode == 503 { return nil }
         if response.statusCode == 304 { guard let active else { throw SyncFailure.invalid }; return active }
@@ -256,7 +264,7 @@ private enum V2DictionaryCache {
         let file = directory.appendingPathComponent("active-v2.json")
         if let active { try JSONEncoder().encode(active).write(to: directory.appendingPathComponent("previous-v2.json"), options: .atomic) }
         try JSONEncoder().encode(value).write(to: file, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
-        if let etag = response.value(forHTTPHeaderField: "ETag") { try? Data(etag.utf8).write(to: tagURL, options: .atomic) }
+        if let etag = response.value(forHTTPHeaderField: "ETag") { try? Data("v\(value.version):\(etag)".utf8).write(to: tagURL, options: .atomic) }
         // Prune abandoned downloads only after the replacement and backup are durable.
         let keep = Set(m.chunks.map { $0.hash + ".json" })
         for url in (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? [] {

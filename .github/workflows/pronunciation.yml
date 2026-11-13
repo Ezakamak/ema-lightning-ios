@@ -29,11 +29,21 @@ jobs:
           curl --fail --location https://raw.githubusercontent.com/cmusphinx/cmudict/74790861f652b15e4ac49015a90074ad62a27690/cmudict.dict -o /tmp/cmudict.dict
           python3 scripts/generate-pronunciation-candidates.py --source /tmp/cmudict.dict --output /tmp/candidates.jsonl
           gzip -dc data/pronunciation/candidates.jsonl.gz | cmp - /tmp/candidates.jsonl
+      - name: Prepare reviewable staging release from unchanged seed
+        working-directory: .
+        run: |
+          mkdir -p build
+          node scripts/prepare-pronunciation-seed.mjs build/reviewed-seed.json
+          node cloudflare/pronunciation-api/scripts/release-v2.js build/reviewed-seed.json 1 build/staging-v2.sql > build/manifest-v2.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: pronunciation-quality
-          path: data/pronunciation/*.report.json
+          path: |
+            data/pronunciation/*.report.json
+            build/reviewed-seed.json
+            build/staging-v2.sql
+            build/manifest-v2.json
   swift:
     runs-on: macos-26
     timeout-minutes: 25
