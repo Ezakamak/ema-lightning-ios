@@ -11,6 +11,10 @@ final class PronunciationRuleTests: XCTestCase {
         let index = PronunciationIndex(rules: rules)
         XCTAssertEqual(index.candidates(in: "İPHONE'dan GOOGLE\t Drive’a IŞIK"), Array(rules.prefix(3)))
         XCTAssertTrue(index.candidates(in: "Merhaba dünya").isEmpty)
+        XCTAssertEqual(index.candidates(in: "Google&nbsp;Drive"), [rules[0]])
+        XCTAssertEqual(index.candidates(in: "iPho\u{2060}ne"), [rules[1]])
+        let apostrophe = PronunciationRule(word: "O'Reilly", pronunciation: "orayli")
+        XCTAssertEqual(PronunciationIndex(rules: [apostrophe]).candidates(in: "O’Reilly"), [apostrophe])
     }
     func testLargeIndexSelectsOnlyRelevantRules() {
         let rules = (0..<40000).map { PronunciationRule(word: "Term\($0)", pronunciation: "terim") }

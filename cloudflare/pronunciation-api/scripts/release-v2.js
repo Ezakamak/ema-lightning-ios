@@ -7,7 +7,7 @@ export async function releaseV2(records, version) {
  if (!Number.isSafeInteger(version) || version < 1 || !records.length || records.length>100000) throw Error('Invalid release');
  // Imported CMU candidates cannot pass this explicit review gate.
  const rules = records.map(r => {
-  if(r.status!=='verified' || !r.provenance || !r.reviewedBy || r.confidence<0.95) throw Error('Unreviewed record');
+  if(r.status!=='verified' || typeof r.provenance!=='string' || !r.provenance.trim() || typeof r.reviewedBy!=='string' || !r.reviewedBy.trim() || !Number.isFinite(r.confidence) || r.confidence<0.95 || r.confidence>1) throw Error('Unreviewed record');
   return validate([r])[0];
  });
  if(new Set(rules.map(r=>key(r.word))).size!==rules.length) throw Error('Duplicate');

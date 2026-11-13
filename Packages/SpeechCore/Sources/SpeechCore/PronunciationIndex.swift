@@ -15,7 +15,9 @@ public final class PronunciationIndex {
         for (index, rule) in rules.enumerated() {
             let tr = rule.word.range(of: "[çğıöşüÇĞÖŞÜ]", options: .regularExpression) != nil
             var node = roots[tr ? 1 : 0]
-            for character in rule.word.precomposedStringWithCanonicalMapping {
+            // First token only: Markdown/entity cleanup may introduce phrase spaces later.
+            let prefix = rule.word.precomposedStringWithCanonicalMapping.split(whereSeparator: \.isWhitespace).first ?? ""
+            for character in prefix {
                 let key = Self.fold(character, turkish: tr)
                 if node.children[key] == nil { node.children[key] = Node() }
                 node = node.children[key]!
@@ -29,7 +31,14 @@ public final class PronunciationIndex {
         return String(character).lowercased(with: Locale(identifier: "tr_TR"))
     }
     public func candidates(in text: String) -> [PronunciationRule] {
-        let chars = Array(text.precomposedStringWithCanonicalMapping)
+        let query = text.precomposedStringWithCanonicalMapping
+            .replacingOccurrences(of: "[’‘ʼ´]", with: "'", options: .regularExpression)
+            .replacingOccurrences(of: "[\\u2060\\ufeff]", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "&nbsp;", with: " ", options: .caseInsensitive)
+            .replacingOccurrences(of: "&amp;", with: "&", options: .caseInsensitive)
+            .replacingOccurrences(of: "&quot;", with: "\"", options: .caseInsensitive)
+            .replacingOccurrences(of: "&apos;", with: "'", options: .caseInsensitive)
+        let chars = Array(query)
         var found = Set<Int>()
         for start in chars.indices {
             // Include punctuation starts (C++, .NET), and preserve all JS boundary cases.
