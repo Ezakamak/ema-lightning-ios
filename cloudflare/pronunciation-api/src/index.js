@@ -9,7 +9,8 @@ export default {async fetch(request,env,ctx) {
  if(request.headers.get('origin')&&request.headers.get('origin')!=='https://speak.ekatech.net') return json({error:'origin_not_allowed'},403);
  const headers={'Access-Control-Allow-Origin':'https://speak.ekatech.net','Access-Control-Expose-Headers':'ETag','Cache-Control':'public, max-age=300','Vary':'Origin'};
  if(request.method==='OPTIONS') return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, HEAD, OPTIONS','Access-Control-Allow-Headers':'If-None-Match'}});
- if(env.RATE_LIMITER&&!(await env.RATE_LIMITER.limit({key:request.headers.get('cf-connecting-ip')||'unknown'})).success) return json({error:'rate_limited'},429,{'Retry-After':'60'});
+ const limiter=path.startsWith('/api/v2/')?env.V2_RATE_LIMITER:env.RATE_LIMITER;
+ if(limiter&&!(await limiter.limit({key:request.headers.get('cf-connecting-ip')||'unknown'})).success) return json({error:'rate_limited'},429,{'Retry-After':'60'});
  if(path.startsWith('/api/v2/pronunciations/')) return serveV2(request,env);
  if(path==='/api/v1/health') return request.method==='HEAD'?new Response(null,{headers}):json({status:'ok'},200,headers);
  try {

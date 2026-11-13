@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import XCTest
 import UIKit
+import CryptoKit
 import SpeechCore
 @testable import EMALightning
 
@@ -26,11 +27,11 @@ final class PronunciationSyncTests: XCTestCase {
         return CentralDictionary(version: version, schemaVersion: 1, locale: "tr-TR", ruleCount: rules.count,
                                  updatedAt: "2026-11-10T00:00:00Z", checksum: CentralDictionary.digest(rules), rules: rules)
     }
-    private func make(_ directory: URL, _ defaults: UserDefaults) -> PronunciationSyncService {
+    private func make(_ directory: URL, _ defaults: UserDefaults, v2: Bool = false) -> PronunciationSyncService {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 15; config.timeoutIntervalForResource = 30
         config.protocolClasses = [DictionaryURLProtocol.self]
-        return PronunciationSyncService(session: URLSession(configuration: config), directory: directory, defaults: defaults, enableV2: false)
+        return PronunciationSyncService(session: URLSession(configuration: config), directory: directory, defaults: defaults, enableV2: v2)
     }
     private func setup() -> (URL, UserDefaults) {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
@@ -45,6 +46,65 @@ final class PronunciationSyncTests: XCTestCase {
             XCTAssertEqual(request.httpMethod, "GET"); XCTAssertNil(request.httpBody); XCTAssertNil(request.url?.query)
             return (200, data, ["ETag": "\"test-\(snapshot.version)\""])
         }
+    }
+    private func v2Payload(_ version: Int, rules: [PronunciationRule]) throws -> (Data, Data, String) {
+        let chunk = try JSONEncoder().encode(rules)
+        let hash = SHA256.hash(data: chunk).map { String(format: "%02x", $0) }.joined()
+        let manifest: [String: Any] = ["schemaVersion": 2, "version": version, "locale": "tr-TR",
+            "ruleCount": rules.count, "checksum": CentralDictionary.digest(rules),
+            "chunks": [["hash": hash, "bytes": chunk.count, "ruleCount": rules.count]]]
+        return (try JSONSerialization.data(withJSONObject: manifest), chunk, hash)
+    }
+    func testV2ChangedChunksAtomicActivationOfflineAndRollback() async throws {
+        let (directory, defaults) = setup(), service = make(directory, defaults, v2: true)
+        let rules = fixture().rules
+        let (manifest, chunk, hash) = try v2Payload(1, rules: rules)
+        var chunkDownloads = 0
+        DictionaryURLProtocol.handler = { request in
+            if request.url!.path.hasSuffix("manifest") { return (200, manifest, ["ETag": "first"]) }
+            XCTAssertTrue(request.url!.path.hasSuffix(hash)); chunkDownloads += 1
+            return (200, chunk, [:])
+        }
+        await service.check(force: true)
+        XCTAssertEqual(service.dictionary?.schemaVersion, 2); XCTAssertEqual(chunkDownloads, 1)
+        let (next, _, _) = try v2Payload(2, rules: rules)
+        DictionaryURLProtocol.handler = { request in
+            XCTAssertTrue(request.url!.path.hasSuffix("manifest"), "Unchanged chunk must be reused")
+            return (200, next, ["ETag": "second"])
+        }
+        await service.check(force: true)
+        XCTAssertEqual(service.dictionary?.version, 2)
+        let previous = directory.appendingPathComponent("previous-v2.json")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: previous.path))
+        DictionaryURLProtocol.handler = { _ in throw URLError(.notConnectedToInternet) }
+        let restored = make(directory, defaults, v2: true)
+        await restored.check(force: true)
+        XCTAssertEqual(restored.dictionary?.version, 2)
+        try Data("corrupt".utf8).write(to: directory.appendingPathComponent("active-v2.json"))
+        let recovered = make(directory, defaults, v2: true)
+        await recovered.check(force: true)
+        XCTAssertEqual(recovered.dictionary?.version, 1)
+    }
+    func testV2CorruptMissingAndDowngradedChunksKeepCurrent() async throws {
+        let (directory, defaults) = setup(), service = make(directory, defaults, v2: true)
+        let (manifest, chunk, _) = try v2Payload(2, rules: fixture().rules)
+        DictionaryURLProtocol.handler = { request in (200, request.url!.path.hasSuffix("manifest") ? manifest : chunk, [:]) }
+        await service.check(force: true)
+        XCTAssertEqual(service.dictionary?.version, 2)
+        let (next, _, _) = try v2Payload(3, rules: [PronunciationRule(word: "Cloud", pronunciation: "klaud", category: "Test")])
+        let before = try Data(contentsOf: directory.appendingPathComponent("active-v2.json"))
+        for status in [200, 404, 500] {
+            DictionaryURLProtocol.handler = { request in
+                request.url!.path.hasSuffix("manifest") ? (200, next, [:]) : (status, Data("[]".utf8), [:])
+            }
+            await service.check(force: true)
+            XCTAssertEqual(service.dictionary?.version, 2)
+            XCTAssertEqual(try Data(contentsOf: directory.appendingPathComponent("active-v2.json")), before)
+        }
+        let (old, _, _) = try v2Payload(1, rules: fixture().rules)
+        DictionaryURLProtocol.handler = { _ in (200, old, [:]) }
+        await service.check(force: true)
+        XCTAssertEqual(service.dictionary?.version, 2)
     }
     func testBundledChecksumMatchesPublishedSnapshot() throws {
         let url = try XCTUnwrap(Bundle.main.url(forResource: "pronunciations", withExtension: "json", subdirectory: "EMA"))

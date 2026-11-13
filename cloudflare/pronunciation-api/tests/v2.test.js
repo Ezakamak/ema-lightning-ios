@@ -6,7 +6,7 @@ import {releaseV2,promoteSQL,hash} from '../scripts/release-v2.js';
 const seeds=JSON.parse(readFileSync('../../App/Resources/EMA/pronunciations.json'));
 const approved=rs=>rs.map(r=>({...r,status:'verified',confidence:1,reviewedBy:'existing-seed',provenance:'bundled-v1'}));
 test('v2 staging, atomic publication, immutable chunks, rollback, v1 preservation',async()=>{
- const mf=new Miniflare({modules:true,scriptPath:'src/index.js',compatibilityDate:'2026-08-06',d1Databases:['DB']});
+ const mf=new Miniflare({modules:true,modulesRules:[{type:'ESModule',include:['**/*.js']}],scriptPath:'src/index.js',compatibilityDate:'2026-08-06',d1Databases:['DB']});
  try {
  const db=await mf.getD1Database('DB');
  for(const file of ['0001_dictionary.sql','0002_shards.sql']) await db.exec(readFileSync('migrations/'+file,'utf8').replace(/\n/g,' '));
