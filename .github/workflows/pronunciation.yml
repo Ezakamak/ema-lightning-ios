@@ -16,7 +16,7 @@ on:
         type: string
         default: iOS-26-2
 concurrency:
-  group: pronunciation-${{ github.ref }}
+  group: pronunciation-${{ github.ref }}-${{ inputs.browser_only && 'browser' || 'swift' }}
   cancel-in-progress: true
 permissions:
   contents: read
